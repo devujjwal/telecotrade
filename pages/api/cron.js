@@ -33,13 +33,6 @@ const handler = async (req, res) => {
         brand: item.name,
         in_stock: item.in_stock,
         countInStock: item.in_stock,
-        featuredImage: item.image,
-        isFeatured:
-          item.properties.item_spec == 'EU Spec' &&
-          (item.properties.warranty != 'No warranty' ||
-            item.properties.warranty != '')
-            ? true
-            : false,
         color: item.color,
         sku: item.sku,
         warehouse: item.warehouse,

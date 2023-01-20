@@ -195,7 +195,6 @@ function AdminProdcuts() {
                           <TableCell>PRICE</TableCell>
                           <TableCell>CATEGORY</TableCell>
                           <TableCell>COUNT</TableCell>
-                          <TableCell>RATING</TableCell>
                           <TableCell>ACTIONS</TableCell>
                         </TableRow>
                       </TableHead>
@@ -206,10 +205,9 @@ function AdminProdcuts() {
                               {product._id.substring(20, 24)}
                             </TableCell>
                             <TableCell>{product.name}</TableCell>
-                            <TableCell>${product.price}</TableCell>
+                            <TableCell>€{product.price}</TableCell>
                             <TableCell>{product.category}</TableCell>
                             <TableCell>{product.countInStock}</TableCell>
-                            <TableCell>{product.rating}</TableCell>
                             <TableCell>
                               <NextLink
                                 href={`/admin/product/${product._id}`}

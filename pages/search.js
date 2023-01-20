@@ -18,27 +18,24 @@ import useStyles from '../utils/styles';
 import ProductItem from '../components/ProductItem';
 import { Store } from '../utils/Store';
 import axios from 'axios';
-import Rating from '@material-ui/lab/Rating';
 import { Pagination } from '@material-ui/lab';
 
 const PAGE_SIZE = 3;
 
 const prices = [
   {
-    name: '$1 to $50',
+    name: '€1 to €50',
     value: '1-50',
   },
   {
-    name: '$51 to $200',
+    name: '€51 to €200',
     value: '51-200',
   },
   {
-    name: '$201 to $1000',
+    name: '€201 to €1000',
     value: '201-1000',
   },
 ];
-
-const ratings = [1, 2, 3, 4, 5];
 
 export default function Search(props) {
   const classes = useStyles();
@@ -48,8 +45,7 @@ export default function Search(props) {
     category = 'all',
     brand = 'all',
     price = 'all',
-    rating = 'all',
-    sort = 'featured',
+    sort = 'newest',
   } = router.query;
   const { products, countProducts, categories, brands, pages } = props;
 
@@ -62,7 +58,6 @@ export default function Search(props) {
     max,
     searchQuery,
     price,
-    rating,
   }) => {
     const path = router.pathname;
     const { query } = router;
@@ -72,7 +67,6 @@ export default function Search(props) {
     if (category) query.category = category;
     if (brand) query.brand = brand;
     if (price) query.price = price;
-    if (rating) query.rating = rating;
     if (min) query.min ? query.min : query.min === 0 ? 0 : min;
     if (max) query.max ? query.max : query.max === 0 ? 0 : max;
 
@@ -95,9 +89,6 @@ export default function Search(props) {
   };
   const priceHandler = (e) => {
     filterSearch({ price: e.target.value });
-  };
-  const ratingHandler = (e) => {
-    filterSearch({ rating: e.target.value });
   };
 
   const { state, dispatch } = useContext(Store);
@@ -158,20 +149,6 @@ export default function Search(props) {
                 </Select>
               </Box>
             </ListItem>
-            <ListItem>
-              <Box className={classes.fullWidth}>
-                <Typography>Ratings</Typography>
-                <Select value={rating} onChange={ratingHandler} fullWidth>
-                  <MenuItem value="all">All</MenuItem>
-                  {ratings.map((rating) => (
-                    <MenuItem dispaly="flex" key={rating} value={rating}>
-                      <Rating value={rating} readOnly />
-                      <Typography component="span">&amp; Up</Typography>
-                    </MenuItem>
-                  ))}
-                </Select>
-              </Box>
-            </ListItem>
           </List>
         </Grid>
         <Grid item md={9}>
@@ -182,11 +159,9 @@ export default function Search(props) {
               {category !== 'all' && ' : ' + category}
               {brand !== 'all' && ' : ' + brand}
               {price !== 'all' && ' : Price ' + price}
-              {rating !== 'all' && ' : Rating ' + rating + ' & up'}
               {(query !== 'all' && query !== '') ||
               category !== 'all' ||
               brand !== 'all' ||
-              rating !== 'all' ||
               price !== 'all' ? (
                 <Button onClick={() => router.push('/search')}>
                   <CancelIcon />
@@ -198,10 +173,8 @@ export default function Search(props) {
                 Sort by
               </Typography>
               <Select value={sort} onChange={sortHandler}>
-                <MenuItem value="featured">Featured</MenuItem>
                 <MenuItem value="lowest">Price: Low to High</MenuItem>
                 <MenuItem value="highest">Price: High to Low</MenuItem>
-                <MenuItem value="toprated">Customer Reviews</MenuItem>
                 <MenuItem value="newest">Newest Arrivals</MenuItem>
               </Select>
             </Grid>
@@ -235,7 +208,6 @@ export async function getServerSideProps({ query }) {
   const category = query.category || '';
   const brand = query.brand || '';
   const price = query.price || '';
-  const rating = query.rating || '';
   const sort = query.sort || '';
   const searchQuery = query.query || '';
 
@@ -250,15 +222,7 @@ export async function getServerSideProps({ query }) {
       : {};
   const categoryFilter = category && category !== 'all' ? { category } : {};
   const brandFilter = brand && brand !== 'all' ? { brand } : {};
-  const ratingFilter =
-    rating && rating !== 'all'
-      ? {
-          rating: {
-            $gte: Number(rating),
-          },
-        }
-      : {};
-  // 10-50
+
   const priceFilter =
     price && price !== 'all'
       ? {
@@ -270,9 +234,7 @@ export async function getServerSideProps({ query }) {
       : {};
 
   const order =
-    sort === 'featured'
-      ? { featured: -1 }
-      : sort === 'lowest'
+    sort === 'lowest'
       ? { price: 1 }
       : sort === 'highest'
       ? { price: -1 }
@@ -284,16 +246,12 @@ export async function getServerSideProps({ query }) {
 
   const categories = await Product.find().distinct('category');
   const brands = await Product.find().distinct('brand');
-  const productDocs = await Product.find(
-    {
-      ...queryFilter,
-      ...categoryFilter,
-      ...priceFilter,
-      ...brandFilter,
-      ...ratingFilter,
-    },
-    '-reviews'
-  )
+  const productDocs = await Product.find({
+    ...queryFilter,
+    ...categoryFilter,
+    ...priceFilter,
+    ...brandFilter,
+  })
     .sort(order)
     .skip(pageSize * (page - 1))
     .limit(pageSize)
@@ -304,7 +262,6 @@ export async function getServerSideProps({ query }) {
     ...categoryFilter,
     ...priceFilter,
     ...brandFilter,
-    ...ratingFilter,
   });
   await db.disconnect();
 

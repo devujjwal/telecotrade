@@ -23,9 +23,7 @@ handler.post(async (req, res) => {
     category: 'sample category',
     brand: 'sample brand',
     countInStock: 0,
-    description: 'sample description',
-    rating: 0,
-    numReviews: 0,
+    description: 'sample description'
   });
 
   const product = await newProduct.save();

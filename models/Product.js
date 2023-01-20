@@ -14,8 +14,6 @@ const productSchema = new mongoose.Schema(
     brand: { type: String, required: true },
     in_stock: { type: Number, default: 0 },
     countInStock: { type: Number, required: true, default: 0 },
-    featuredImage: { type: String },
-    isFeatured: { type: Boolean, required: true, default: false },
     color: { type: String },
     sku: { type: String, required: true },
     warehouse: { type: String },
