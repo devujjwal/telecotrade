@@ -1,28 +1,8 @@
 import axios from 'axios';
-import dynamic from 'next/dynamic';
-import { useRouter } from 'next/router';
-import NextLink from 'next/link';
-import React, { useEffect, useContext, useReducer } from 'react';
-import {
-  CircularProgress,
-  Grid,
-  List,
-  ListItem,
-  Typography,
-  Card,
-  Button,
-  ListItemText,
-  TableContainer,
-  Table,
-  TableHead,
-  TableRow,
-  TableCell,
-  TableBody,
-} from '@material-ui/core';
-import { getError } from '../../utils/error';
-import { Store } from '../../utils/Store';
+import Link from 'next/link';
+import React, { useEffect, useReducer } from 'react';
 import Layout from '../../components/Layout';
-import useStyles from '../../utils/styles';
+import { getError } from '../../utils/error';
 
 function reducer(state, action) {
   switch (action.type) {
@@ -37,12 +17,7 @@ function reducer(state, action) {
   }
 }
 
-function AdminOrders() {
-  const { state } = useContext(Store);
-  const router = useRouter();
-  const classes = useStyles();
-  const { userInfo } = state;
-
+export default function AdminOrderScreen() {
   const [{ loading, error, orders }, dispatch] = useReducer(reducer, {
     loading: true,
     orders: [],
@@ -50,15 +25,10 @@ function AdminOrders() {
   });
 
   useEffect(() => {
-    if (!userInfo) {
-      router.push('/login');
-    }
     const fetchData = async () => {
       try {
         dispatch({ type: 'FETCH_REQUEST' });
-        const { data } = await axios.get(`/api/admin/orders`, {
-          headers: { authorization: `Bearer ${userInfo.token}` },
-        });
+        const { data } = await axios.get(`/api/admin/orders`);
         dispatch({ type: 'FETCH_SUCCESS', payload: data });
       } catch (err) {
         dispatch({ type: 'FETCH_FAIL', payload: getError(err) });
@@ -66,100 +36,80 @@ function AdminOrders() {
     };
     fetchData();
   }, []);
-  return (
-    <Layout title="Orders">
-      <Grid container spacing={1}>
-        <Grid item md={3} xs={12}>
-          <Card className={classes.section}>
-            <List>
-              <NextLink href="/admin/dashboard" passHref>
-                <ListItem button component="a">
-                  <ListItemText primary="Admin Dashboard"></ListItemText>
-                </ListItem>
-              </NextLink>
-              <NextLink href="/admin/orders" passHref>
-                <ListItem selected button component="a">
-                  <ListItemText primary="Orders"></ListItemText>
-                </ListItem>
-              </NextLink>
-              <NextLink href="/admin/products" passHref>
-                <ListItem button component="a">
-                  <ListItemText primary="Products"></ListItemText>
-                </ListItem>
-              </NextLink>
-              <NextLink href="/admin/users" passHref>
-                <ListItem button component="a">
-                  <ListItemText primary="Users"></ListItemText>
-                </ListItem>
-              </NextLink>
-            </List>
-          </Card>
-        </Grid>
-        <Grid item md={9} xs={12}>
-          <Card className={classes.section}>
-            <List>
-              <ListItem>
-                <Typography component="h1" variant="h1">
-                  Orders
-                </Typography>
-              </ListItem>
 
-              <ListItem>
-                {loading ? (
-                  <CircularProgress />
-                ) : error ? (
-                  <Typography className={classes.error}>{error}</Typography>
-                ) : (
-                  <TableContainer>
-                    <Table>
-                      <TableHead>
-                        <TableRow>
-                          <TableCell>ID</TableCell>
-                          <TableCell>USER</TableCell>
-                          <TableCell>DATE</TableCell>
-                          <TableCell>TOTAL</TableCell>
-                          <TableCell>PAID</TableCell>
-                          <TableCell>DELIVERED</TableCell>
-                          <TableCell>ACTION</TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {orders.map((order) => (
-                          <TableRow key={order._id}>
-                            <TableCell>{order._id.substring(20, 24)}</TableCell>
-                            <TableCell>
-                              {order.user ? order.user.name : 'DELETED USER'}
-                            </TableCell>
-                            <TableCell>{order.createdAt}</TableCell>
-                            <TableCell>${order.totalPrice}</TableCell>
-                            <TableCell>
-                              {order.isPaid
-                                ? `paid at ${order.paidAt}`
-                                : 'not paid'}
-                            </TableCell>
-                            <TableCell>
-                              {order.isDelivered
-                                ? `delivered at ${order.deliveredAt}`
-                                : 'not delivered'}
-                            </TableCell>
-                            <TableCell>
-                              <NextLink href={`/order/${order._id}`} passHref>
-                                <Button variant="contained">Details</Button>
-                              </NextLink>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                )}
-              </ListItem>
-            </List>
-          </Card>
-        </Grid>
-      </Grid>
+  return (
+    <Layout title="Admin Dashboard">
+      <div className="grid md:grid-cols-4 md:gap-5 bg-white p-5 border-border-200 shadow rounded">
+        <div>
+          <ul>
+            <li>
+              <Link href="/admin/dashboard">Dashboard</Link>
+            </li>
+            <li>
+              <Link href="/admin/orders">
+                <a className="font-bold">Orders</a>
+              </Link>
+            </li>
+            <li>
+              <Link href="/admin/users">Users</Link>
+            </li>
+          </ul>
+        </div>
+        <div className="overflow-x-auto md:col-span-3">
+          <h1 className="mb-4 text-xl">Admin Orders</h1>
+
+          {loading ? (
+            <div>Loading...</div>
+          ) : error ? (
+            <div className="alert-error">{error}</div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="min-w-full">
+                <thead className="border-b">
+                  <tr>
+                    <th className="p-5 text-left">USER</th>
+                    <th className="p-5 text-left">DATE</th>
+                    <th className="p-5 text-left">TOTAL</th>
+                    <th className="p-5 text-left">PAID</th>
+                    <th className="p-5 text-left">DELIVERED</th>
+                    <th className="p-5 text-left">ACTION</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {orders.map((order) => (
+                    <tr key={order._id} className="border-b">
+                      <td className="p-5">
+                        {order.user ? order.user.name : 'DELETED USER'}
+                      </td>
+                      <td className="p-5">
+                        {order.createdAt.substring(0, 10)}
+                      </td>
+                      <td className="p-5">€{order.totalPrice}</td>
+                      <td className="p-5">
+                        {order.isPaid
+                          ? `${order.paidAt.substring(0, 10)}`
+                          : 'Not Paid'}
+                      </td>
+                      <td className="p-5">
+                        {order.isDelivered
+                          ? `${order.deliveredAt.substring(0, 10)}`
+                          : 'In Processing'}
+                      </td>
+                      <td className="p-5">
+                        <Link href={`/order/${order._id}`} passHref>
+                          <a>Details</a>
+                        </Link>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </div>
     </Layout>
   );
 }
 
-export default dynamic(() => Promise.resolve(AdminOrders), { ssr: false });
+AdminOrderScreen.auth = { adminOnly: true };

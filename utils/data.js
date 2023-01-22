@@ -4,14 +4,16 @@ const data = {
     {
       name: 'Harjinder Singh Chog',
       email: 'info@telecotrade.com',
-      password: bcrypt.hashSync('123456'),
+      password: bcrypt.hashSync('Neues1807'),
       isAdmin: true,
+      isRetailer: false,
     },
     {
       name: 'Ujjwal Paul',
       email: 'devujjwal1989@gmail.com',
-      password: bcrypt.hashSync('123456'),
+      password: bcrypt.hashSync('Hriday123!'),
       isAdmin: false,
+      isRetailer: false,
     },
   ],
   products: [

@@ -1,2 +1,1 @@
-# telecotrade
-Webshop ( Next JS / Mongo DB)
+ECommerce Website (NextJS and Mongo DB)

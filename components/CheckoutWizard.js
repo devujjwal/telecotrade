@@ -1,22 +1,26 @@
-import { Step, StepLabel, Stepper } from '@material-ui/core';
 import React from 'react';
-import useStyles from '../utils/styles';
 
 export default function CheckoutWizard({ activeStep = 0 }) {
-  const classes = useStyles();
   return (
-    <Stepper
-      className={classes.transparentBackgroud}
-      activeStep={activeStep}
-      alternativeLabel
-    >
-      {['Login', 'Shipping Address', 'Payment Method', 'Place Order'].map(
-        (step) => (
-          <Step key={step}>
-            <StepLabel>{step}</StepLabel>
-          </Step>
+    <div className="mb-5 flex flex-wrap">
+      {['User Login', 'Shipping Address', 'Payment Method', 'Place Order'].map(
+        (step, index) => (
+          <div
+            key={step}
+            className={`flex-1 border-b-2  
+          text-center 
+       ${
+         index <= activeStep
+           ? 'border-indigo-500   text-indigo-500'
+           : 'border-gray-400 text-gray-400'
+       }
+          
+       `}
+          >
+            {step}
+          </div>
         )
       )}
-    </Stepper>
+    </div>
   );
 }

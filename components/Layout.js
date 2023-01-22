@@ -1,95 +1,56 @@
-import React, { useContext } from 'react';
+import { signOut, useSession } from 'next-auth/react';
 import Head from 'next/head';
-import NextLink from 'next/link';
-import {
-  AppBar,
-  Toolbar,
-  Typography,
-  Container,
-  Link,
-  createTheme,
-  ThemeProvider,
-  CssBaseline,
-  Switch,
-  Badge,
-  Button,
-  Menu,
-  MenuItem,
-  Box,
-  IconButton,
-  Drawer,
-  List,
-  ListItem,
-  Divider,
-  ListItemText,
-  InputBase,
-} from '@material-ui/core';
-import MenuIcon from '@material-ui/icons/Menu';
-import CancelIcon from '@material-ui/icons/Cancel';
-import SearchIcon from '@material-ui/icons/Search';
-import useStyles from '../utils/styles';
-import { Store } from '../utils/Store';
-import { getError } from '../utils/error';
+import Link from 'next/link';
 import Cookies from 'js-cookie';
-import { useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
+import { ToastContainer } from 'react-toastify';
+import { Menu } from '@headlessui/react';
+import 'react-toastify/dist/ReactToastify.css';
+import { Store } from '../utils/Store';
+import DropdownLink from './DropdownLink';
 import { useRouter } from 'next/router';
-import { useSnackbar } from 'notistack';
+import { SearchIcon } from '@heroicons/react/outline';
 import axios from 'axios';
-import { useEffect } from 'react';
 
-export default function Layout({ title, description, children }) {
-  const router = useRouter();
+export default function Layout({ title, children }) {
+  const { status, data: session } = useSession();
+
   const { state, dispatch } = useContext(Store);
-  const { darkMode, cart, userInfo } = state;
-  const theme = createTheme({
-    typography: {
-      h1: {
-        fontSize: '1.6rem',
-        fontWeight: 400,
-        margin: '1rem 0',
-      },
-      h2: {
-        fontSize: '1.4rem',
-        fontWeight: 400,
-        margin: '1rem 0',
-      },
-    },
-    palette: {
-      type: darkMode ? 'dark' : 'light',
-      primary: {
-        main: '#f0c000',
-      },
-      secondary: {
-        main: '#208080',
-      },
-    },
-  });
-  const classes = useStyles();
+  const { cart } = state;
 
-  const [sidbarVisible, setSidebarVisible] = useState(false);
+  const [setSidebarVisible] = useState(false);
   const sidebarOpenHandler = () => {
-    setSidebarVisible(true);
+    true;
   };
   const sidebarCloseHandler = () => {
     setSidebarVisible(false);
   };
 
   const [categories, setCategories] = useState([]);
-  const { enqueueSnackbar } = useSnackbar();
 
   const fetchCategories = async () => {
     try {
       const { data } = await axios.get(`/api/products/categories`);
       setCategories(data);
     } catch (err) {
-      enqueueSnackbar(getError(err), { variant: 'error' });
+      console.log(err);
     }
   };
 
-  const [query, setQuery] = useState('');
-  const queryChangeHandler = (e) => {
-    setQuery(e.target.value);
+  const [cartItemsCount, setCartItemsCount] = useState(0);
+  useEffect(() => {
+    setCartItemsCount(cart.cartItems.reduce((a, c) => a + c.quantity, 0));
+  }, [cart.cartItems]);
+
+  const logoutClickHandler = () => {
+    Cookies.remove('cart');
+    dispatch({ type: 'CART_RESET' });
+    signOut({ callbackUrl: '/login' });
   };
+
+  const [query, setQuery] = useState('');
+
+  const router = useRouter();
   const submitHandler = (e) => {
     e.preventDefault();
     router.push(`/search?query=${query}`);
@@ -99,197 +60,159 @@ export default function Layout({ title, description, children }) {
     fetchCategories();
   }, []);
 
-  const darkModeChangeHandler = () => {
-    dispatch({ type: darkMode ? 'DARK_MODE_OFF' : 'DARK_MODE_ON' });
-    const newDarkMode = !darkMode;
-    Cookies.set('darkMode', newDarkMode ? 'ON' : 'OFF');
-  };
-  const [anchorEl, setAnchorEl] = useState(null);
-  const loginClickHandler = (e) => {
-    setAnchorEl(e.currentTarget);
-  };
-  const loginMenuCloseHandler = (e, redirect) => {
-    setAnchorEl(null);
-    if (redirect) {
-      router.push(redirect);
-    }
-  };
-  const logoutClickHandler = () => {
-    setAnchorEl(null);
-    dispatch({ type: 'USER_LOGOUT' });
-    Cookies.remove('userInfo');
-    Cookies.remove('cartItems');
-    Cookies.remove('shippinhAddress');
-    Cookies.remove('paymentMethod');
-    router.push('/');
-  };
   return (
-    <div>
+    <>
       <Head>
         <title>
           {title
             ? `${title} - Telecommunication Trading`
             : 'Telecommunication Trading Germany Company'}
         </title>
-        {description && <meta name="description" content={description}></meta>}
+        <meta name="description" content="Ecommerce Website" />
+        <link rel="icon" href="/favicon.ico" />
       </Head>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <AppBar position="static" className={classes.navbar}>
-          <Toolbar className={classes.toolbar}>
-            <Box display="flex" alignItems="center">
-              <IconButton
-                edge="start"
-                aria-label="open drawer"
-                onClick={sidebarOpenHandler}
-                className={classes.menuButton}
-              >
-                <MenuIcon className={classes.navbarButton} />
-              </IconButton>
-              <NextLink href="/" passHref>
-                <Link>
-                  <Typography className={classes.brand}>
-                    Teleco Trade
-                  </Typography>
-                </Link>
-              </NextLink>
-            </Box>
-            <Drawer
-              anchor="left"
-              open={sidbarVisible}
-              onClose={sidebarCloseHandler}
-            >
-              <List>
-                <ListItem>
-                  <Box
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="space-between"
-                  >
-                    <Typography>Shopping by category</Typography>
-                    <IconButton
-                      aria-label="close"
-                      onClick={sidebarCloseHandler}
-                    >
-                      <CancelIcon />
-                    </IconButton>
-                  </Box>
-                </ListItem>
-                <Divider light />
-                {categories.map((category) => (
-                  <NextLink
-                    key={category}
-                    href={`/search?category=${category}`}
-                    passHref
-                  >
-                    <ListItem
-                      button
-                      component="a"
-                      onClick={sidebarCloseHandler}
-                    >
-                      <ListItemText primary={category}></ListItemText>
-                    </ListItem>
-                  </NextLink>
-                ))}
-              </List>
-            </Drawer>
 
-            <div className={classes.searchSection}>
-              <form onSubmit={submitHandler} className={classes.searchForm}>
-                <InputBase
-                  name="query"
-                  className={classes.searchInput}
-                  placeholder="Search products"
-                  onChange={queryChangeHandler}
-                />
-                <IconButton
-                  type="submit"
-                  className={classes.iconButton}
-                  aria-label="search"
-                >
-                  <SearchIcon />
-                </IconButton>
-              </form>
+      <ToastContainer position="bottom-center" limit={1} />
+
+      <div className="flex min-h-screen flex-col justify-between ">
+        <header className="fixed z-50 w-full">
+          <nav className="flex h-24 items-center justify-between bg-white px-4 shadow-md">
+            <div className="cursor-pointer px-4 " onClick={sidebarOpenHandler}>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth="2"
+                stroke="currentColor"
+                aria-hidden="true"
+                className="h-5 w-5 text-blue-500"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M4 6h16M4 12h16M4 18h16"
+                ></path>
+              </svg>
             </div>
+            <Link href="/">
+              <a className="text-lg font-bold">Teleco Trade</a>
+            </Link>
+            <form
+              onSubmit={submitHandler}
+              className="w-full max-w-3xl mx-auto  hidden justify-center md:flex h-14 shadow-900"
+            >
+              <input
+                onChange={(e) => setQuery(e.target.value)}
+                type="text"
+                className="rounded-tr-none rounded-br-none p-1 flex h-full w-full focus:ring-0"
+                placeholder="Search products"
+              />
+              <button
+                className="flex h-full min-w-[143px] items-center justify-center rounded-lg  rounded rounded-tl-none rounded-bl-none bg-amber-300 p-1"
+                type="submit"
+                id="button-addon2"
+              >
+                <SearchIcon className="h-5 w-5 mr-1"></SearchIcon> Search
+              </button>
+            </form>
             <div>
-              <Switch
-                checked={darkMode}
-                onChange={darkModeChangeHandler}
-              ></Switch>
-              <NextLink href="/cart" passHref>
-                <Link>
-                  <Typography component="span">
-                    {cart.cartItems.length > 0 ? (
-                      <Badge
-                        color="secondary"
-                        badgeContent={cart.cartItems.length}
+              <Link href="/cart">
+                <a className="p-2">
+                  Cart
+                  {cartItemsCount > 0 && (
+                    <span className="ml-1 rounded-full bg-red-600 px-2 py-1 text-xs font-bold text-white">
+                      {cartItemsCount}
+                    </span>
+                  )}
+                </a>
+              </Link>
+
+              {status === 'loading' ? (
+                'Loading'
+              ) : session?.user ? (
+                <Menu as="div" className="relative inline-block">
+                  <Menu.Button className="text-blue-600">
+                    {session.user.name}
+                  </Menu.Button>
+                  <Menu.Items className="absolute right-0 w-56 origin-top-right bg-white  shadow-lg ">
+                    <Menu.Item>
+                      <DropdownLink className="dropdown-link" href="/profile">
+                        Profile
+                      </DropdownLink>
+                    </Menu.Item>
+                    <Menu.Item>
+                      <DropdownLink
+                        className="dropdown-link"
+                        href="/order-history"
                       >
-                        Cart
-                      </Badge>
-                    ) : (
-                      'Cart'
+                        Order History
+                      </DropdownLink>
+                    </Menu.Item>
+                    {session.user.isAdmin && (
+                      <Menu.Item>
+                        <DropdownLink
+                          className="dropdown-link"
+                          href="/admin/dashboard"
+                        >
+                          Admin Dashboard
+                        </DropdownLink>
+                      </Menu.Item>
                     )}
-                  </Typography>
-                </Link>
-              </NextLink>
-              {userInfo ? (
-                <>
-                  <Button
-                    aria-controls="simple-menu"
-                    aria-haspopup="true"
-                    onClick={loginClickHandler}
-                    className={classes.navbarButton}
-                  >
-                    {userInfo.name}
-                  </Button>
-                  <Menu
-                    id="simple-menu"
-                    anchorEl={anchorEl}
-                    keepMounted
-                    open={Boolean(anchorEl)}
-                    onClose={loginMenuCloseHandler}
-                  >
-                    <MenuItem
-                      onClick={(e) => loginMenuCloseHandler(e, '/profile')}
-                    >
-                      Profile
-                    </MenuItem>
-                    <MenuItem
-                      onClick={(e) =>
-                        loginMenuCloseHandler(e, '/order-history')
-                      }
-                    >
-                      Order Hisotry
-                    </MenuItem>
-                    {userInfo.isAdmin && (
-                      <MenuItem
-                        onClick={(e) =>
-                          loginMenuCloseHandler(e, '/admin/dashboard')
-                        }
+                    <Menu.Item>
+                      <a
+                        className="dropdown-link"
+                        href="#"
+                        onClick={logoutClickHandler}
                       >
-                        Admin Dashboard
-                      </MenuItem>
-                    )}
-                    <MenuItem onClick={logoutClickHandler}>Logout</MenuItem>
-                  </Menu>
-                </>
+                        Logout
+                      </a>
+                    </Menu.Item>
+                  </Menu.Items>
+                </Menu>
               ) : (
-                <NextLink href="/login" passHref>
-                  <Link>
-                    <Typography component="span">Login</Typography>
-                  </Link>
-                </NextLink>
+                <Link href="/login">
+                  <a className="p-2">Login</a>
+                </Link>
               )}
             </div>
-          </Toolbar>
-        </AppBar>
-        <Container className={classes.main}>{children}</Container>
-        <footer className={classes.footer}>
-          <Typography>
-            All rights reserved. Telecommunication Trading Germany Company.
-          </Typography>
+          </nav>
+          <div className="fixed top-0 left-0 z-40 h-full w-[20rem] translate-x-[-20rem] bg-gray-300 p-10  duration-300 ease-in-out dark:bg-gray-800">
+            <div className="mb-2 flex justify-between">
+              <h2>Shopping By Categories</h2>
+              <button>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth="2"
+                  stroke="currentColor"
+                  aria-hidden="true"
+                  className="h-5 w-5 "
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+                  ></path>
+                </svg>
+              </button>
+            </div>
+            <ul>
+              {categories.map((category) => (
+                <Link key={category} href={`/search?category=${category}`}>
+                  <a>
+                    <li onClick={sidebarCloseHandler}>{category}</li>
+                  </a>
+                </Link>
+              ))}
+            </ul>
+          </div>
+        </header>
+        <main className="container m-auto mt-28 px-5">{children}</main>
+        <footer className="flex h-10 items-center justify-center shadow-inner">
+          <p>All rights reserved. Telecommunication Trading Germany Company.</p>
         </footer>
-      </ThemeProvider>
-    </div>
+      </div>
+    </>
   );
 }

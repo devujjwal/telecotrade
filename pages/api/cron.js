@@ -40,6 +40,7 @@ const handler = async (req, res) => {
         delivery_date: item.delivery_date,
         exp_available: item.exp_available,
         ean: item.ean,
+        item_spec: item.properties.item_spec,
         properties: item.properties,
       }));
       await db.connect();

@@ -1,195 +1,141 @@
-import {
-  List,
-  ListItem,
-  Typography,
-  TextField,
-  Button,
-  Link,
-} from '@material-ui/core';
-import axios from 'axios';
-import { useRouter } from 'next/router';
-import NextLink from 'next/link';
-import React, { useContext, useEffect } from 'react';
+import Link from 'next/link';
+import React, { useEffect } from 'react';
+import { signIn, useSession } from 'next-auth/react';
+import { useForm } from 'react-hook-form';
 import Layout from '../components/Layout';
-import { Store } from '../utils/Store';
-import useStyles from '../utils/styles';
-import Cookies from 'js-cookie';
-import { Controller, useForm } from 'react-hook-form';
-import { useSnackbar } from 'notistack';
 import { getError } from '../utils/error';
+import { toast } from 'react-toastify';
+import { useRouter } from 'next/router';
+import axios from 'axios';
 
-export default function Register() {
-  const {
-    handleSubmit,
-    control,
-    formState: { errors },
-  } = useForm();
-  const { enqueueSnackbar, closeSnackbar } = useSnackbar();
+export default function LoginScreen() {
+  const { data: session } = useSession();
+
   const router = useRouter();
   const { redirect } = router.query;
-  const { state, dispatch } = useContext(Store);
-  const { userInfo } = state;
-  useEffect(() => {
-    if (userInfo) {
-      router.push('/');
-    }
-  }, []);
 
-  const classes = useStyles();
-  const submitHandler = async ({ name, email, password, confirmPassword }) => {
-    closeSnackbar();
-    if (password !== confirmPassword) {
-      enqueueSnackbar("Passwords don't match", { variant: 'error' });
-      return;
+  useEffect(() => {
+    if (session?.user) {
+      router.push(redirect || '/');
     }
+  }, [router, session, redirect]);
+
+  const {
+    handleSubmit,
+    register,
+    getValues,
+    formState: { errors },
+  } = useForm();
+  const submitHandler = async ({ name, email, password }) => {
     try {
-      const { data } = await axios.post('/api/users/register', {
+      await axios.post('/api/auth/signup', {
         name,
         email,
         password,
       });
-      dispatch({ type: 'USER_LOGIN', payload: data });
-      Cookies.set('userInfo', data);
-      router.push(redirect || '/');
+
+      const result = await signIn('credentials', {
+        redirect: false,
+        email,
+        password,
+      });
+      if (result.error) {
+        toast.error(result.error);
+      }
     } catch (err) {
-      enqueueSnackbar(getError(err), { variant: 'error' });
+      toast.error(getError(err));
     }
   };
   return (
-    <Layout title="Register">
-      <form onSubmit={handleSubmit(submitHandler)} className={classes.form}>
-        <Typography component="h1" variant="h1">
-          Register
-        </Typography>
-        <List>
-          <ListItem>
-            <Controller
-              name="name"
-              control={control}
-              defaultValue=""
-              rules={{
-                required: true,
-                minLength: 2,
-              }}
-              render={({ field }) => (
-                <TextField
-                  variant="outlined"
-                  fullWidth
-                  id="name"
-                  label="Name"
-                  inputProps={{ type: 'name' }}
-                  error={Boolean(errors.name)}
-                  helperText={
-                    errors.name
-                      ? errors.name.type === 'minLength'
-                        ? 'Name length is more than 1'
-                        : 'Name is required'
-                      : ''
-                  }
-                  {...field}
-                ></TextField>
-              )}
-            ></Controller>
-          </ListItem>
-          <ListItem>
-            <Controller
-              name="email"
-              control={control}
-              defaultValue=""
-              rules={{
-                required: true,
-                pattern: /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$/,
-              }}
-              render={({ field }) => (
-                <TextField
-                  variant="outlined"
-                  fullWidth
-                  id="email"
-                  label="Email"
-                  inputProps={{ type: 'email' }}
-                  error={Boolean(errors.email)}
-                  helperText={
-                    errors.email
-                      ? errors.email.type === 'pattern'
-                        ? 'Email is not valid'
-                        : 'Email is required'
-                      : ''
-                  }
-                  {...field}
-                ></TextField>
-              )}
-            ></Controller>
-          </ListItem>
-          <ListItem>
-            <Controller
-              name="password"
-              control={control}
-              defaultValue=""
-              rules={{
-                required: true,
-                minLength: 6,
-              }}
-              render={({ field }) => (
-                <TextField
-                  variant="outlined"
-                  fullWidth
-                  id="password"
-                  label="Password"
-                  inputProps={{ type: 'password' }}
-                  error={Boolean(errors.password)}
-                  helperText={
-                    errors.password
-                      ? errors.password.type === 'minLength'
-                        ? 'Password length is more than 5'
-                        : 'Password is required'
-                      : ''
-                  }
-                  {...field}
-                ></TextField>
-              )}
-            ></Controller>
-          </ListItem>
-          <ListItem>
-            <Controller
-              name="confirmPassword"
-              control={control}
-              defaultValue=""
-              rules={{
-                required: true,
-                minLength: 6,
-              }}
-              render={({ field }) => (
-                <TextField
-                  variant="outlined"
-                  fullWidth
-                  id="confirmPassword"
-                  label="Confirm Password"
-                  inputProps={{ type: 'password' }}
-                  error={Boolean(errors.confirmPassword)}
-                  helperText={
-                    errors.confirmPassword
-                      ? errors.confirmPassword.type === 'minLength'
-                        ? 'Confirm Password length is more than 5'
-                        : 'Confirm  Password is required'
-                      : ''
-                  }
-                  {...field}
-                ></TextField>
-              )}
-            ></Controller>
-          </ListItem>
-          <ListItem>
-            <Button variant="contained" type="submit" fullWidth color="primary">
-              Register
-            </Button>
-          </ListItem>
-          <ListItem>
-            Already have an account? &nbsp;
-            <NextLink href={`/login?redirect=${redirect || '/'}`} passHref>
-              <Link>Login</Link>
-            </NextLink>
-          </ListItem>
-        </List>
+    <Layout title="Create Account">
+      <form
+        className="mx-auto max-w-screen-md"
+        onSubmit={handleSubmit(submitHandler)}
+      >
+        <h1 className="mb-4 text-xl">Create Account</h1>
+        <div className="mb-4">
+          <label htmlFor="name">Name</label>
+          <input
+            type="text"
+            className="w-full"
+            id="name"
+            autoFocus
+            {...register('name', {
+              required: 'Please enter name',
+            })}
+          />
+          {errors.name && (
+            <div className="text-red-500">{errors.name.message}</div>
+          )}
+        </div>
+
+        <div className="mb-4">
+          <label htmlFor="email">Email</label>
+          <input
+            type="email"
+            {...register('email', {
+              required: 'Please enter email',
+              pattern: {
+                value: /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+.[a-zA-Z0-9-.]+$/i,
+                message: 'Please enter valid email',
+              },
+            })}
+            className="w-full"
+            id="email"
+          ></input>
+          {errors.email && (
+            <div className="text-red-500">{errors.email.message}</div>
+          )}
+        </div>
+        <div className="mb-4">
+          <label htmlFor="password">Password</label>
+          <input
+            type="password"
+            {...register('password', {
+              required: 'Please enter password',
+              minLength: { value: 6, message: 'password is more than 5 chars' },
+            })}
+            className="w-full"
+            id="password"
+            autoFocus
+          ></input>
+          {errors.password && (
+            <div className="text-red-500 ">{errors.password.message}</div>
+          )}
+        </div>
+        <div className="mb-4">
+          <label htmlFor="confirmPassword">Confirm Password</label>
+          <input
+            className="w-full"
+            type="password"
+            id="confirmPassword"
+            {...register('confirmPassword', {
+              required: 'Please enter confirm password',
+              validate: (value) => value === getValues('password'),
+              minLength: {
+                value: 6,
+                message: 'confirm password is more than 5 chars',
+              },
+            })}
+          />
+          {errors.confirmPassword && (
+            <div className="text-red-500 ">
+              {errors.confirmPassword.message}
+            </div>
+          )}
+          {errors.confirmPassword &&
+            errors.confirmPassword.type === 'validate' && (
+              <div className="text-red-500 ">Password do not match</div>
+            )}
+        </div>
+
+        <div className="mb-4 ">
+          <button className="primary-button">Register</button>
+        </div>
+        <div className="mb-4 ">
+          Don&apos;t have an account? &nbsp;
+          <Link href={`/register?redirect=${redirect || '/'}`}>Register</Link>
+        </div>
       </form>
     </Layout>
   );

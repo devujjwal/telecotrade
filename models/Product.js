@@ -21,6 +21,7 @@ const productSchema = new mongoose.Schema(
     delivery_date: { type: String },
     exp_available: { type: Number },
     ean: { type: String },
+    item_spec: { type: String },
     properties: {
       full_name: { type: String },
       ean: { type: String },

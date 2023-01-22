@@ -1,238 +1,136 @@
-import axios from 'axios';
-import dynamic from 'next/dynamic';
-import { useRouter } from 'next/router';
-import NextLink from 'next/link';
-import React, { useEffect, useContext } from 'react';
-import {
-  Grid,
-  List,
-  ListItem,
-  Typography,
-  Card,
-  Button,
-  ListItemText,
-  TextField,
-} from '@material-ui/core';
+import React, { useEffect } from 'react';
+import { signIn, useSession } from 'next-auth/react';
+import { useForm } from 'react-hook-form';
+import { toast } from 'react-toastify';
 import { getError } from '../utils/error';
-import { Store } from '../utils/Store';
+import axios from 'axios';
 import Layout from '../components/Layout';
-import useStyles from '../utils/styles';
-import { Controller, useForm } from 'react-hook-form';
-import { useSnackbar } from 'notistack';
-import Cookies from 'js-cookie';
 
-function Profile() {
-  const { state, dispatch } = useContext(Store);
+export default function ProfileScreen() {
+  const { data: session } = useSession();
+
   const {
     handleSubmit,
-    control,
-    formState: { errors },
+    register,
+    getValues,
     setValue,
+    formState: { errors },
   } = useForm();
-  const { enqueueSnackbar, closeSnackbar } = useSnackbar();
-  const router = useRouter();
-  const classes = useStyles();
-  const { userInfo } = state;
 
   useEffect(() => {
-    if (!userInfo) {
-      return router.push('/login');
-    }
-    setValue('name', userInfo.name);
-    setValue('email', userInfo.email);
-  }, []);
-  const submitHandler = async ({ name, email, password, confirmPassword }) => {
-    closeSnackbar();
-    if (password !== confirmPassword) {
-      enqueueSnackbar("Passwords don't match", { variant: 'error' });
-      return;
-    }
-    try {
-      const { data } = await axios.put(
-        '/api/users/profile',
-        {
-          name,
-          email,
-          password,
-        },
-        { headers: { authorization: `Bearer ${userInfo.token}` } }
-      );
-      dispatch({ type: 'USER_LOGIN', payload: data });
-      Cookies.set('userInfo', data);
+    setValue('name', session.user.name);
+    setValue('email', session.user.email);
+  }, [session.user, setValue]);
 
-      enqueueSnackbar('Profile updated successfully', { variant: 'success' });
+  const submitHandler = async ({ name, email, password }) => {
+    try {
+      await axios.put('/api/auth/update', {
+        name,
+        email,
+        password,
+      });
+      const result = await signIn('credentials', {
+        redirect: false,
+        email,
+        password,
+      });
+      toast.success('Profile updated successfully');
+      if (result.error) {
+        toast.error(result.error);
+      }
     } catch (err) {
-      enqueueSnackbar(getError(err), { variant: 'error' });
+      toast.error(getError(err));
     }
   };
+
   return (
     <Layout title="Profile">
-      <Grid container spacing={1}>
-        <Grid item md={3} xs={12}>
-          <Card className={classes.section}>
-            <List>
-              <NextLink href="/profile" passHref>
-                <ListItem selected button component="a">
-                  <ListItemText primary="User Profile"></ListItemText>
-                </ListItem>
-              </NextLink>
-              <NextLink href="/order-history" passHref>
-                <ListItem button component="a">
-                  <ListItemText primary="Order History"></ListItemText>
-                </ListItem>
-              </NextLink>
-            </List>
-          </Card>
-        </Grid>
-        <Grid item md={9} xs={12}>
-          <Card className={classes.section}>
-            <List>
-              <ListItem>
-                <Typography component="h1" variant="h1">
-                  Profile
-                </Typography>
-              </ListItem>
-              <ListItem>
-                <form
-                  onSubmit={handleSubmit(submitHandler)}
-                  className={classes.form}
-                >
-                  <List>
-                    <ListItem>
-                      <Controller
-                        name="name"
-                        control={control}
-                        defaultValue=""
-                        rules={{
-                          required: true,
-                          minLength: 2,
-                        }}
-                        render={({ field }) => (
-                          <TextField
-                            variant="outlined"
-                            fullWidth
-                            id="name"
-                            label="Name"
-                            inputProps={{ type: 'name' }}
-                            error={Boolean(errors.name)}
-                            helperText={
-                              errors.name
-                                ? errors.name.type === 'minLength'
-                                  ? 'Name length is more than 1'
-                                  : 'Name is required'
-                                : ''
-                            }
-                            {...field}
-                          ></TextField>
-                        )}
-                      ></Controller>
-                    </ListItem>
-                    <ListItem>
-                      <Controller
-                        name="email"
-                        control={control}
-                        defaultValue=""
-                        rules={{
-                          required: true,
-                          pattern: /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$/,
-                        }}
-                        render={({ field }) => (
-                          <TextField
-                            variant="outlined"
-                            fullWidth
-                            id="email"
-                            label="Email"
-                            inputProps={{ type: 'email' }}
-                            error={Boolean(errors.email)}
-                            helperText={
-                              errors.email
-                                ? errors.email.type === 'pattern'
-                                  ? 'Email is not valid'
-                                  : 'Email is required'
-                                : ''
-                            }
-                            {...field}
-                          ></TextField>
-                        )}
-                      ></Controller>
-                    </ListItem>
-                    <ListItem>
-                      <Controller
-                        name="password"
-                        control={control}
-                        defaultValue=""
-                        rules={{
-                          validate: (value) =>
-                            value === '' ||
-                            value.length > 5 ||
-                            'Password length is more than 5',
-                        }}
-                        render={({ field }) => (
-                          <TextField
-                            variant="outlined"
-                            fullWidth
-                            id="password"
-                            label="Password"
-                            inputProps={{ type: 'password' }}
-                            error={Boolean(errors.password)}
-                            helperText={
-                              errors.password
-                                ? 'Password length is more than 5'
-                                : ''
-                            }
-                            {...field}
-                          ></TextField>
-                        )}
-                      ></Controller>
-                    </ListItem>
-                    <ListItem>
-                      <Controller
-                        name="confirmPassword"
-                        control={control}
-                        defaultValue=""
-                        rules={{
-                          validate: (value) =>
-                            value === '' ||
-                            value.length > 5 ||
-                            'Confirm Password length is more than 5',
-                        }}
-                        render={({ field }) => (
-                          <TextField
-                            variant="outlined"
-                            fullWidth
-                            id="confirmPassword"
-                            label="Confirm Password"
-                            inputProps={{ type: 'password' }}
-                            error={Boolean(errors.confirmPassword)}
-                            helperText={
-                              errors.password
-                                ? 'Confirm Password length is more than 5'
-                                : ''
-                            }
-                            {...field}
-                          ></TextField>
-                        )}
-                      ></Controller>
-                    </ListItem>
-                    <ListItem>
-                      <Button
-                        variant="contained"
-                        type="submit"
-                        fullWidth
-                        color="primary"
-                      >
-                        Update
-                      </Button>
-                    </ListItem>
-                  </List>
-                </form>
-              </ListItem>
-            </List>
-          </Card>
-        </Grid>
-      </Grid>
+      <form
+        className="mx-auto max-w-screen-md"
+        onSubmit={handleSubmit(submitHandler)}
+      >
+        <h1 className="mb-4 text-xl">Update Profile</h1>
+
+        <div className="mb-4">
+          <label htmlFor="name">Name</label>
+          <input
+            type="text"
+            className="w-full"
+            id="name"
+            autoFocus
+            {...register('name', {
+              required: 'Please enter name',
+            })}
+          />
+          {errors.name && (
+            <div className="text-red-500">{errors.name.message}</div>
+          )}
+        </div>
+
+        <div className="mb-4">
+          <label htmlFor="email">Email</label>
+          <input
+            type="email"
+            className="w-full"
+            id="email"
+            {...register('email', {
+              required: 'Please enter email',
+              pattern: {
+                value: /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+.[a-zA-Z0-9-.]+$/i,
+                message: 'Please enter valid email',
+              },
+            })}
+          />
+          {errors.email && (
+            <div className="text-red-500">{errors.email.message}</div>
+          )}
+        </div>
+
+        <div className="mb-4">
+          <label htmlFor="password">Password</label>
+          <input
+            className="w-full"
+            type="password"
+            id="password"
+            {...register('password', {
+              minLength: { value: 6, message: 'password is more than 5 chars' },
+            })}
+          />
+          {errors.password && (
+            <div className="text-red-500 ">{errors.password.message}</div>
+          )}
+        </div>
+
+        <div className="mb-4">
+          <label htmlFor="confirmPassword">Confirm Password</label>
+          <input
+            className="w-full"
+            type="password"
+            id="confirmPassword"
+            {...register('confirmPassword', {
+              validate: (value) => value === getValues('password'),
+              minLength: {
+                value: 6,
+                message: 'confirm password is more than 5 chars',
+              },
+            })}
+          />
+          {errors.confirmPassword && (
+            <div className="text-red-500 ">
+              {errors.confirmPassword.message}
+            </div>
+          )}
+          {errors.confirmPassword &&
+            errors.confirmPassword.type === 'validate' && (
+              <div className="text-red-500 ">Password do not match</div>
+            )}
+        </div>
+        <div className="mb-4">
+          <button className="primary-button">Update Profile</button>
+        </div>
+      </form>
     </Layout>
   );
 }
 
-export default dynamic(() => Promise.resolve(Profile), { ssr: false });
+ProfileScreen.auth = true;

@@ -1,132 +1,92 @@
-import {
-  List,
-  ListItem,
-  Typography,
-  TextField,
-  Button,
-  Link,
-} from '@material-ui/core';
-import axios from 'axios';
-import { useRouter } from 'next/router';
-import NextLink from 'next/link';
-import React, { useContext, useEffect } from 'react';
+import Link from 'next/link';
+import React, { useEffect } from 'react';
+import { signIn, useSession } from 'next-auth/react';
+import { useForm } from 'react-hook-form';
 import Layout from '../components/Layout';
-import { Store } from '../utils/Store';
-import useStyles from '../utils/styles';
-import Cookies from 'js-cookie';
-import { Controller, useForm } from 'react-hook-form';
-import { useSnackbar } from 'notistack';
 import { getError } from '../utils/error';
+import { toast } from 'react-toastify';
+import { useRouter } from 'next/router';
 
-export default function Login() {
+export default function LoginScreen() {
+  const { data: session } = useSession();
+
+  const router = useRouter();
+  const { redirect } = router.query;
+
+  useEffect(() => {
+    if (session?.user) {
+      router.push(redirect || '/');
+    }
+  }, [router, session, redirect]);
+
   const {
     handleSubmit,
-    control,
+    register,
     formState: { errors },
   } = useForm();
-  const { enqueueSnackbar, closeSnackbar } = useSnackbar();
-  const router = useRouter();
-  const { redirect } = router.query; // login?redirect=/shipping
-  const { state, dispatch } = useContext(Store);
-  const { userInfo } = state;
-  useEffect(() => {
-    if (userInfo) {
-      router.push('/');
-    }
-  }, []);
-
-  const classes = useStyles();
   const submitHandler = async ({ email, password }) => {
-    closeSnackbar();
     try {
-      const { data } = await axios.post('/api/users/login', {
+      const result = await signIn('credentials', {
+        redirect: false,
         email,
         password,
       });
-      dispatch({ type: 'USER_LOGIN', payload: data });
-      Cookies.set('userInfo', data);
-      router.push(redirect || '/');
+      if (result.error) {
+        toast.error(result.error);
+      }
     } catch (err) {
-      enqueueSnackbar(getError(err), { variant: 'error' });
+      toast.error(getError(err));
     }
   };
   return (
     <Layout title="Login">
-      <form onSubmit={handleSubmit(submitHandler)} className={classes.form}>
-        <Typography component="h1" variant="h1">
-          Login
-        </Typography>
-        <List>
-          <ListItem>
-            <Controller
-              name="email"
-              control={control}
-              defaultValue=""
-              rules={{
-                required: true,
-                pattern: /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$/,
-              }}
-              render={({ field }) => (
-                <TextField
-                  variant="outlined"
-                  fullWidth
-                  id="email"
-                  label="Email"
-                  inputProps={{ type: 'email' }}
-                  error={Boolean(errors.email)}
-                  helperText={
-                    errors.email
-                      ? errors.email.type === 'pattern'
-                        ? 'Email is not valid'
-                        : 'Email is required'
-                      : ''
-                  }
-                  {...field}
-                ></TextField>
-              )}
-            ></Controller>
-          </ListItem>
-          <ListItem>
-            <Controller
-              name="password"
-              control={control}
-              defaultValue=""
-              rules={{
-                required: true,
-                minLength: 6,
-              }}
-              render={({ field }) => (
-                <TextField
-                  variant="outlined"
-                  fullWidth
-                  id="password"
-                  label="Password"
-                  inputProps={{ type: 'password' }}
-                  error={Boolean(errors.password)}
-                  helperText={
-                    errors.password
-                      ? errors.password.type === 'minLength'
-                        ? 'Password length is more than 5'
-                        : 'Password is required'
-                      : ''
-                  }
-                  {...field}
-                ></TextField>
-              )}
-            ></Controller>
-          </ListItem>
-          <ListItem>
-            <Button variant="contained" type="submit" fullWidth color="primary">
-              Login
-            </Button>
-          </ListItem>
-          <ListItem>
-            Don&apos;t have an account? &nbsp;
-            <NextLink href={`/register?redirect=${redirect || '/'}`} passHref>
-              <Link>Register</Link>
-            </NextLink>
-          </ListItem>
-        </List>
+      <form
+        className="mx-auto max-w-screen-md"
+        onSubmit={handleSubmit(submitHandler)}
+      >
+        <h1 className="mb-4 text-xl">Login</h1>
+        <div className="mb-4">
+          <label htmlFor="email">Email</label>
+          <input
+            type="email"
+            {...register('email', {
+              required: 'Please enter email',
+              pattern: {
+                value: /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+.[a-zA-Z0-9-.]+$/i,
+                message: 'Please enter valid email',
+              },
+            })}
+            className="w-full"
+            id="email"
+            autoFocus
+          ></input>
+          {errors.email && (
+            <div className="text-red-500">{errors.email.message}</div>
+          )}
+        </div>
+        <div className="mb-4">
+          <label htmlFor="password">Password</label>
+          <input
+            type="password"
+            {...register('password', {
+              required: 'Please enter password',
+              minLength: { value: 6, message: 'password is more than 5 chars' },
+            })}
+            className="w-full"
+            id="password"
+            autoFocus
+          ></input>
+          {errors.password && (
+            <div className="text-red-500 ">{errors.password.message}</div>
+          )}
+        </div>
+        <div className="mb-4 ">
+          <button className="primary-button">Login</button>
+        </div>
+        <div className="mb-4 ">
+          Don&apos;t have an account? &nbsp;
+          <Link href={`/register?redirect=${redirect || '/'}`}>Register</Link>
+        </div>
       </form>
     </Layout>
   );

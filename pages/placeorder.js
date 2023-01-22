@@ -1,249 +1,183 @@
-import React, { useContext, useEffect, useState } from 'react';
-import dynamic from 'next/dynamic';
-import Layout from '../components/Layout';
-import { Store } from '../utils/Store';
-import NextLink from 'next/link';
-import Image from 'next/image';
-import {
-  Grid,
-  TableContainer,
-  Table,
-  Typography,
-  TableHead,
-  TableBody,
-  TableRow,
-  TableCell,
-  Link,
-  CircularProgress,
-  Button,
-  Card,
-  List,
-  ListItem,
-} from '@material-ui/core';
 import axios from 'axios';
+import Image from 'next/image';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
-import useStyles from '../utils/styles';
-import CheckoutWizard from '../components/CheckoutWizard';
-import { useSnackbar } from 'notistack';
-import { getError } from '../utils/error';
 import Cookies from 'js-cookie';
+import React, { useContext, useEffect, useState } from 'react';
+import { toast } from 'react-toastify';
+import CheckoutWizard from '../components/CheckoutWizard';
+import Layout from '../components/Layout';
+import { getError } from '../utils/error';
+import { Store } from '../utils/Store';
 
-function PlaceOrder() {
-  const classes = useStyles();
-  const router = useRouter();
+export default function PlaceOrderScreen() {
   const { state, dispatch } = useContext(Store);
-  const {
-    userInfo,
-    cart: { cartItems, shippingAddress, paymentMethod },
-  } = state;
-  const round2 = (num) => Math.round(num * 100 + Number.EPSILON) / 100; // 123.456 => 123.46
+  const { cart } = state;
+  const { cartItems, shippingAddress, paymentMethod } = cart;
+
+  const round2 = (num) => Math.round(num * 100 + Number.EPSILON) / 100;
+
   const itemsPrice = round2(
-    cartItems.reduce((a, c) => a + c.price * c.quantity, 0)
-  );
+    cartItems.reduce((a, c) => a + c.quantity * c.price, 0)
+  ); // 123.4567 => 123.46
+
   const shippingPrice = itemsPrice > 200 ? 0 : 15;
-  const taxPrice = round2(itemsPrice * 0.15);
+  const taxPrice = itemsPrice < 5000 ? round2(itemsPrice * 0.19) : 0;
   const totalPrice = round2(itemsPrice + shippingPrice + taxPrice);
 
+  const router = useRouter();
   useEffect(() => {
     if (!paymentMethod) {
       router.push('/payment');
     }
-    if (cartItems.length === 0) {
-      router.push('/cart');
-    }
-  }, []);
-  const { closeSnackbar, enqueueSnackbar } = useSnackbar();
+  }, [paymentMethod, router]);
+
   const [loading, setLoading] = useState(false);
+
   const placeOrderHandler = async () => {
-    closeSnackbar();
     try {
       setLoading(true);
-      const { data } = await axios.post(
-        '/api/orders',
-        {
-          orderItems: cartItems,
-          shippingAddress,
-          paymentMethod,
-          itemsPrice,
-          shippingPrice,
-          taxPrice,
-          totalPrice,
-        },
-        {
-          headers: {
-            authorization: `Bearer ${userInfo.token}`,
-          },
-        }
-      );
-      dispatch({ type: 'CART_CLEAR' });
-      Cookies.remove('cartItems');
+      const { data } = await axios.post('/api/orders', {
+        orderItems: cartItems,
+        shippingAddress,
+        paymentMethod,
+        itemsPrice,
+        shippingPrice,
+        taxPrice,
+        totalPrice,
+      });
       setLoading(false);
+      dispatch({ type: 'CART_CLEAR_ITEMS' });
+      Cookies.set(
+        'cart',
+        JSON.stringify({
+          ...cart,
+          cartItems: [],
+        })
+      );
       router.push(`/order/${data._id}`);
     } catch (err) {
       setLoading(false);
-      enqueueSnackbar(getError(err), { variant: 'error' });
+      toast.error(getError(err));
     }
   };
+
   return (
     <Layout title="Place Order">
-      <CheckoutWizard activeStep={3}></CheckoutWizard>
-      <Typography component="h1" variant="h1">
-        Place Order
-      </Typography>
-
-      <Grid container spacing={1}>
-        <Grid item md={9} xs={12}>
-          <Card className={classes.section}>
-            <List>
-              <ListItem>
-                <Typography component="h2" variant="h2">
-                  Shipping Address
-                </Typography>
-              </ListItem>
-              <ListItem>
+      <CheckoutWizard activeStep={3} />
+      <h1 className="mb-4 text-xl">Place Order</h1>
+      {cartItems.length === 0 ? (
+        <div>
+          Cart is empty. <Link href="/">Go shopping</Link>
+        </div>
+      ) : (
+        <div className="grid md:grid-cols-4 md:gap-5">
+          <div className="overflow-x-auto md:col-span-3">
+            <div className="card  p-5">
+              <h2 className="mb-2 text-lg">Shipping Address</h2>
+              <div>
                 {shippingAddress.fullName}, {shippingAddress.address},{' '}
                 {shippingAddress.city}, {shippingAddress.postalCode},{' '}
                 {shippingAddress.country}
-              </ListItem>
-            </List>
-          </Card>
-          <Card className={classes.section}>
-            <List>
-              <ListItem>
-                <Typography component="h2" variant="h2">
-                  Payment Method
-                </Typography>
-              </ListItem>
-              <ListItem>{paymentMethod}</ListItem>
-            </List>
-          </Card>
-          <Card className={classes.section}>
-            <List>
-              <ListItem>
-                <Typography component="h2" variant="h2">
-                  Order Items
-                </Typography>
-              </ListItem>
-              <ListItem>
-                <TableContainer>
-                  <Table>
-                    <TableHead>
-                      <TableRow>
-                        <TableCell>Image</TableCell>
-                        <TableCell>Name</TableCell>
-                        <TableCell align="right">Quantity</TableCell>
-                        <TableCell align="right">Price</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {cartItems.map((item) => (
-                        <TableRow key={item._id}>
-                          <TableCell>
-                            <NextLink href={`/product/${item.slug}`} passHref>
-                              <Link>
-                                <Image
-                                  src={item.image}
-                                  alt={item.name}
-                                  width={50}
-                                  height={50}
-                                ></Image>
-                              </Link>
-                            </NextLink>
-                          </TableCell>
-
-                          <TableCell>
-                            <NextLink href={`/product/${item.slug}`} passHref>
-                              <Link>
-                                <Typography>{item.name}</Typography>
-                              </Link>
-                            </NextLink>
-                          </TableCell>
-                          <TableCell align="right">
-                            <Typography>{item.quantity}</Typography>
-                          </TableCell>
-                          <TableCell align="right">
-                            <Typography>€{item.price}</Typography>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              </ListItem>
-            </List>
-          </Card>
-        </Grid>
-        <Grid item md={3} xs={12}>
-          <Card className={classes.section}>
-            <List>
-              <ListItem>
-                <Typography variant="h2">Order Summary</Typography>
-              </ListItem>
-              <ListItem>
-                <Grid container>
-                  <Grid item xs={6}>
-                    <Typography>Items:</Typography>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Typography align="right">€{itemsPrice}</Typography>
-                  </Grid>
-                </Grid>
-              </ListItem>
-              <ListItem>
-                <Grid container>
-                  <Grid item xs={6}>
-                    <Typography>Tax:</Typography>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Typography align="right">€{taxPrice}</Typography>
-                  </Grid>
-                </Grid>
-              </ListItem>
-              <ListItem>
-                <Grid container>
-                  <Grid item xs={6}>
-                    <Typography>Shipping:</Typography>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Typography align="right">€{shippingPrice}</Typography>
-                  </Grid>
-                </Grid>
-              </ListItem>
-              <ListItem>
-                <Grid container>
-                  <Grid item xs={6}>
-                    <Typography>
-                      <strong>Total:</strong>
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Typography align="right">
-                      <strong>€{totalPrice}</strong>
-                    </Typography>
-                  </Grid>
-                </Grid>
-              </ListItem>
-              <ListItem>
-                <Button
-                  onClick={placeOrderHandler}
-                  variant="contained"
-                  color="primary"
-                  fullWidth
-                >
-                  Place Order
-                </Button>
-              </ListItem>
-              {loading && (
-                <ListItem>
-                  <CircularProgress />
-                </ListItem>
-              )}
-            </List>
-          </Card>
-        </Grid>
-      </Grid>
+              </div>
+              <div>
+                <Link href="/shipping">Edit</Link>
+              </div>
+            </div>
+            <div className="card  p-5">
+              <h2 className="mb-2 text-lg">Payment Method</h2>
+              <div>{paymentMethod}</div>
+              <div>
+                <Link href="/payment">Edit</Link>
+              </div>
+            </div>
+            <div className="card overflow-x-auto p-5">
+              <h2 className="mb-2 text-lg">Order Items</h2>
+              <table className="min-w-full">
+                <thead className="border-b">
+                  <tr>
+                    <th className="px-5 text-left">Item</th>
+                    <th className="    p-5 text-right">Quantity</th>
+                    <th className="  p-5 text-right">Price</th>
+                    <th className="p-5 text-right">Subtotal</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {cartItems.map((item) => (
+                    <tr key={item._id} className="border-b">
+                      <td>
+                        <Link href={`/product/${item.slug}`}>
+                          <a className="flex items-center">
+                            <Image
+                              src={item.image}
+                              alt={item.name}
+                              width={50}
+                              height={50}
+                              objectFit="contain"
+                            ></Image>
+                            &nbsp;
+                            {item.name}
+                          </a>
+                        </Link>
+                      </td>
+                      <td className=" p-5 text-right">{item.quantity}</td>
+                      <td className="p-5 text-right">€{item.price}</td>
+                      <td className="p-5 text-right">
+                        €{item.quantity * item.price}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <div>
+                <Link href="/cart">Edit</Link>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div className="card  p-5">
+              <h2 className="mb-2 text-lg">Order Summary</h2>
+              <ul>
+                <li>
+                  <div className="mb-2 flex justify-between">
+                    <div>Items</div>
+                    <div>€{itemsPrice}</div>
+                  </div>
+                </li>
+                <li>
+                  <div className="mb-2 flex justify-between">
+                    <div>Tax</div>
+                    <div>€{taxPrice}</div>
+                  </div>
+                </li>
+                <li>
+                  <div className="mb-2 flex justify-between">
+                    <div>Shipping</div>
+                    <div>€{shippingPrice}</div>
+                  </div>
+                </li>
+                <li>
+                  <div className="mb-2 flex justify-between">
+                    <div>Total</div>
+                    <div>€{totalPrice}</div>
+                  </div>
+                </li>
+                <li>
+                  <button
+                    disabled={loading}
+                    onClick={placeOrderHandler}
+                    className="primary-button w-full"
+                  >
+                    {loading ? 'Loading...' : 'Place Order'}
+                  </button>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      )}
     </Layout>
   );
 }
 
-export default dynamic(() => Promise.resolve(PlaceOrder), { ssr: false });
+PlaceOrderScreen.auth = true;

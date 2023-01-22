@@ -1,100 +1,77 @@
-import Cookies from 'js-cookie';
 import { useRouter } from 'next/router';
 import React, { useContext, useEffect, useState } from 'react';
-import { Store } from '../utils/Store';
-import Layout from '../components/Layout';
+import { toast } from 'react-toastify';
+import Cookies from 'js-cookie';
 import CheckoutWizard from '../components/CheckoutWizard';
-import useStyles from '../utils/styles';
-import {
-  Button,
-  FormControl,
-  FormControlLabel,
-  List,
-  ListItem,
-  Radio,
-  RadioGroup,
-  Typography,
-} from '@material-ui/core';
-import { useSnackbar } from 'notistack';
+import Layout from '../components/Layout';
+import { Store } from '../utils/Store';
 
-export default function Payment() {
-  const { enqueueSnackbar, closeSnackbar } = useSnackbar();
-  const classes = useStyles();
-  const router = useRouter();
-  const [paymentMethod, setPaymentMethod] = useState('');
+export default function PaymentScreen() {
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('');
+
   const { state, dispatch } = useContext(Store);
-  const {
-    cart: { shippingAddress },
-  } = state;
+  const { cart } = state;
+  const { shippingAddress, paymentMethod } = cart;
+
+  const router = useRouter();
+
+  const submitHandler = (e) => {
+    e.preventDefault();
+    if (!selectedPaymentMethod) {
+      return toast.error('Payment method is required');
+    }
+    dispatch({ type: 'SAVE_PAYMENT_METHOD', payload: selectedPaymentMethod });
+    Cookies.set(
+      'cart',
+      JSON.stringify({
+        ...cart,
+        paymentMethod: selectedPaymentMethod,
+      })
+    );
+
+    router.push('/placeorder');
+  };
   useEffect(() => {
     if (!shippingAddress.address) {
-      router.push('/shipping');
-    } else {
-      setPaymentMethod(Cookies.get('paymentMethod') || '');
+      return router.push('/shipping');
     }
-  }, []);
-  const submitHandler = (e) => {
-    closeSnackbar();
-    e.preventDefault();
-    if (!paymentMethod) {
-      enqueueSnackbar('Payment method is required', { variant: 'error' });
-    } else {
-      dispatch({ type: 'SAVE_PAYMENT_METHOD', payload: paymentMethod });
-      Cookies.set('paymentMethod', paymentMethod);
-      router.push('/placeorder');
-    }
-  };
+    setSelectedPaymentMethod(paymentMethod || '');
+  }, [paymentMethod, router, shippingAddress.address]);
+
   return (
     <Layout title="Payment Method">
-      <CheckoutWizard activeStep={2}></CheckoutWizard>
-      <form className={classes.form} onSubmit={submitHandler}>
-        <Typography component="h1" variant="h1">
-          Payment Method
-        </Typography>
-        <List>
-          <ListItem>
-            <FormControl component="fieldset">
-              <RadioGroup
-                aria-label="Payment Method"
-                name="paymentMethod"
-                value={paymentMethod}
-                onChange={(e) => setPaymentMethod(e.target.value)}
-              >
-                <FormControlLabel
-                  label="PayPal"
-                  value="PayPal"
-                  control={<Radio />}
-                ></FormControlLabel>
-                <FormControlLabel
-                  label="Stripe"
-                  value="Stripe"
-                  control={<Radio />}
-                ></FormControlLabel>
-                <FormControlLabel
-                  label="Cash"
-                  value="Cash"
-                  control={<Radio />}
-                ></FormControlLabel>
-              </RadioGroup>
-            </FormControl>
-          </ListItem>
-          <ListItem>
-            <Button fullWidth type="submit" variant="contained" color="primary">
-              Continue
-            </Button>
-          </ListItem>
-          <ListItem>
-            <Button
-              fullWidth
-              type="button"
-              variant="contained"
-              onClick={() => router.push('/shipping')}
-            >
-              Back
-            </Button>
-          </ListItem>
-        </List>
+      <CheckoutWizard activeStep={2} />
+      <form className="mx-auto max-w-screen-md" onSubmit={submitHandler}>
+        <h1 className="mb-4 text-xl">Payment Method</h1>
+        {['Bank Transfer'].map((payment) => (
+          <div key={payment} className="mb-4">
+            <input
+              name="paymentMethod"
+              className="p-2 outline-none focus:ring-0"
+              id={payment}
+              type="radio"
+              checked={selectedPaymentMethod === payment}
+              onChange={() => setSelectedPaymentMethod(payment)}
+            />
+
+            <label className="p-2" htmlFor={payment}>
+              {payment}
+            </label>
+          </div>
+        ))}
+        <div className="mb-4 flex justify-between">
+          <button
+            onClick={() => router.push('/shipping')}
+            type="button"
+            className="default-button"
+          >
+            Back
+          </button>
+          <button className="primary-button">Next</button>
+        </div>
       </form>
     </Layout>
   );
 }
+
+PaymentScreen.auth = true;

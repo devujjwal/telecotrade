@@ -1,22 +1,21 @@
-import nc from 'next-connect';
+import { getSession } from 'next-auth/react';
 import Order from '../../../models/Order';
-import { isAuth } from '../../../utils/auth';
 import db from '../../../utils/db';
-import { onError } from '../../../utils/error';
 
-const handler = nc({
-  onError,
-});
-handler.use(isAuth);
+const handler = async (req, res) => {
+  const session = await getSession({ req });
+  if (!session) {
+    return res.status(401).send('signin required');
+  }
 
-handler.post(async (req, res) => {
+  const { user } = session;
   await db.connect();
   const newOrder = new Order({
     ...req.body,
-    user: req.user._id,
+    user: user._id,
   });
+
   const order = await newOrder.save();
   res.status(201).send(order);
-});
-
+};
 export default handler;

@@ -1,26 +1,15 @@
-import {
-  Box,
-  Button,
-  Grid,
-  List,
-  ListItem,
-  MenuItem,
-  Select,
-  Typography,
-} from '@material-ui/core';
-import CancelIcon from '@material-ui/icons/Cancel';
-import { useRouter } from 'next/router';
-import React, { useContext } from 'react';
-import Layout from '../components/Layout';
-import db from '../utils/db';
-import Product from '../models/Product';
-import useStyles from '../utils/styles';
-import ProductItem from '../components/ProductItem';
-import { Store } from '../utils/Store';
 import axios from 'axios';
-import { Pagination } from '@material-ui/lab';
+import { useRouter } from 'next/router';
+import { useContext } from 'react';
+import { toast } from 'react-toastify';
+import Layout from '../components/Layout';
+import { Store } from '../utils/Store';
+import { XCircleIcon } from '@heroicons/react/outline';
+import ProductItem from '../components/ProductItem';
+import Product from '../models/Product';
+import db from '../utils/db';
 
-const PAGE_SIZE = 3;
+const PAGE_SIZE = 60;
 
 const prices = [
   {
@@ -38,15 +27,17 @@ const prices = [
 ];
 
 export default function Search(props) {
-  const classes = useStyles();
   const router = useRouter();
+
   const {
     query = 'all',
     category = 'all',
     brand = 'all',
     price = 'all',
     sort = 'newest',
+    page = 1,
   } = router.query;
+
   const { products, countProducts, categories, brands, pages } = props;
 
   const filterSearch = ({
@@ -59,7 +50,6 @@ export default function Search(props) {
     searchQuery,
     price,
   }) => {
-    const path = router.pathname;
     const { query } = router;
     if (page) query.page = page;
     if (searchQuery) query.searchQuery = searchQuery;
@@ -71,14 +61,14 @@ export default function Search(props) {
     if (max) query.max ? query.max : query.max === 0 ? 0 : max;
 
     router.push({
-      pathname: path,
+      pathname: router.pathname,
       query: query,
     });
   };
   const categoryHandler = (e) => {
     filterSearch({ category: e.target.value });
   };
-  const pageHandler = (e, page) => {
+  const pageHandler = (page) => {
     filterSearch({ page });
   };
   const brandHandler = (e) => {
@@ -97,112 +87,117 @@ export default function Search(props) {
     const quantity = existItem ? existItem.quantity + 1 : 1;
     const { data } = await axios.get(`/api/products/${product._id}`);
     if (data.countInStock < quantity) {
-      window.alert('Sorry. Product is out of stock');
+      toast.error('Sorry. Product is out of stock');
       return;
     }
     dispatch({ type: 'CART_ADD_ITEM', payload: { ...product, quantity } });
     router.push('/cart');
   };
   return (
-    <Layout title="Search">
-      <Grid className={classes.mt1} container spacing={1}>
-        <Grid item md={3}>
-          <List>
-            <ListItem>
-              <Box className={classes.fullWidth}>
-                <Typography>Categories</Typography>
-                <Select fullWidth value={category} onChange={categoryHandler}>
-                  <MenuItem value="all">All</MenuItem>
-                  {categories &&
-                    categories.map((category) => (
-                      <MenuItem key={category} value={category}>
-                        {category}
-                      </MenuItem>
-                    ))}
-                </Select>
-              </Box>
-            </ListItem>
-            <ListItem>
-              <Box className={classes.fullWidth}>
-                <Typography>Brands</Typography>
-                <Select value={brand} onChange={brandHandler} fullWidth>
-                  <MenuItem value="all">All</MenuItem>
-                  {brands &&
-                    brands.map((brand) => (
-                      <MenuItem key={brand} value={brand}>
-                        {brand}
-                      </MenuItem>
-                    ))}
-                </Select>
-              </Box>
-            </ListItem>
-            <ListItem>
-              <Box className={classes.fullWidth}>
-                <Typography>Prices</Typography>
-                <Select value={price} onChange={priceHandler} fullWidth>
-                  <MenuItem value="all">All</MenuItem>
-                  {prices.map((price) => (
-                    <MenuItem key={price.value} value={price.value}>
-                      {price.name}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </Box>
-            </ListItem>
-          </List>
-        </Grid>
-        <Grid item md={9}>
-          <Grid container justifyContent="space-between" alignItems="center">
-            <Grid item>
+    <Layout title="search">
+      <div className="grid md:grid-cols-4 md:gap-5">
+        <div>
+          <div className="my-3">
+            <h3>Categories</h3>
+            <select
+              className="w-full"
+              value={category}
+              onChange={categoryHandler}
+            >
+              <option value="all">All</option>
+              {categories &&
+                categories.map((category) => (
+                  <option key={category} value={category}>
+                    {category}
+                  </option>
+                ))}
+            </select>
+          </div>
+          <div className="mb-3">
+            <h3>Brands</h3>
+            <select className="w-full" value={brand} onChange={brandHandler}>
+              <option value="all">All</option>
+              {brands &&
+                brands.map((brand) => (
+                  <option key={brand} value={brand}>
+                    {brand}
+                  </option>
+                ))}
+            </select>
+          </div>
+          <div className="mb-3">
+            <h3>Prices</h3>
+            <select className="w-full" value={price} onChange={priceHandler}>
+              <option value="all">All</option>
+              {prices &&
+                prices.map((price) => (
+                  <option key={price.value} value={price.value}>
+                    {price.name}
+                  </option>
+                ))}
+            </select>
+          </div>
+        </div>
+        <div className="md:col-span-3">
+          <div className="mb-2 flex items-center justify-between border-b-2 pb-2">
+            <div className="flex items-center">
               {products.length === 0 ? 'No' : countProducts} Results
               {query !== 'all' && query !== '' && ' : ' + query}
               {category !== 'all' && ' : ' + category}
               {brand !== 'all' && ' : ' + brand}
               {price !== 'all' && ' : Price ' + price}
+              &nbsp;
               {(query !== 'all' && query !== '') ||
               category !== 'all' ||
               brand !== 'all' ||
               price !== 'all' ? (
-                <Button onClick={() => router.push('/search')}>
-                  <CancelIcon />
-                </Button>
+                <button onClick={() => router.push('/search')}>
+                  <XCircleIcon className="h-5 w-5" />
+                </button>
               ) : null}
-            </Grid>
-            <Grid item>
-              <Typography component="span" className={classes.sort}>
-                Sort by
-              </Typography>
-              <Select value={sort} onChange={sortHandler}>
-                <MenuItem value="lowest">Price: Low to High</MenuItem>
-                <MenuItem value="highest">Price: High to Low</MenuItem>
-                <MenuItem value="newest">Newest Arrivals</MenuItem>
-              </Select>
-            </Grid>
-          </Grid>
-          <Grid className={classes.mt1} container spacing={3}>
-            {products.map((product) => (
-              <Grid item md={4} key={product.name}>
+            </div>
+            <div>
+              Sort by{' '}
+              <select value={sort} onChange={sortHandler}>
+                <option value="newest">Newest Arrivals</option>
+                <option value="lowest">Price: Low to High</option>
+                <option value="highest">Price: High to Low</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3  ">
+              {products.map((product) => (
                 <ProductItem
+                  key={product._id}
                   product={product}
                   addToCartHandler={addToCartHandler}
                 />
-              </Grid>
-            ))}
-          </Grid>
-          <Pagination
-            className={classes.mt1}
-            defaultPage={parseInt(query.page || '1')}
-            count={pages}
-            onChange={pageHandler}
-          ></Pagination>
-        </Grid>
-      </Grid>
+              ))}
+            </div>
+            <ul className="flex">
+              {products.length > 0 &&
+                [...Array(pages).keys()].map((pageNumber) => (
+                  <li key={pageNumber}>
+                    <button
+                      className={`default-button m-2 ${
+                        page == pageNumber + 1 ? 'font-bold' : ''
+                      } `}
+                      onClick={() => pageHandler(pageNumber + 1)}
+                    >
+                      {pageNumber + 1}
+                    </button>
+                  </li>
+                ))}
+            </ul>
+          </div>
+        </div>
+      </div>
     </Layout>
   );
 }
 
 export async function getServerSideProps({ query }) {
-  await db.connect();
   const pageSize = query.pageSize || PAGE_SIZE;
   const page = query.page || 1;
   const category = query.category || '';
@@ -223,6 +218,7 @@ export async function getServerSideProps({ query }) {
   const categoryFilter = category && category !== 'all' ? { category } : {};
   const brandFilter = brand && brand !== 'all' ? { brand } : {};
 
+  // 10-50
   const priceFilter =
     price && price !== 'all'
       ? {
@@ -232,26 +228,27 @@ export async function getServerSideProps({ query }) {
           },
         }
       : {};
-
   const order =
     sort === 'lowest'
       ? { price: 1 }
       : sort === 'highest'
       ? { price: -1 }
-      : sort === 'toprated'
-      ? { rating: -1 }
       : sort === 'newest'
       ? { createdAt: -1 }
       : { _id: -1 };
 
+  await db.connect();
   const categories = await Product.find().distinct('category');
   const brands = await Product.find().distinct('brand');
-  const productDocs = await Product.find({
-    ...queryFilter,
-    ...categoryFilter,
-    ...priceFilter,
-    ...brandFilter,
-  })
+  const productDocs = await Product.find(
+    {
+      ...queryFilter,
+      ...categoryFilter,
+      ...priceFilter,
+      ...brandFilter,
+    },
+    '-reviews'
+  )
     .sort(order)
     .skip(pageSize * (page - 1))
     .limit(pageSize)
@@ -263,8 +260,8 @@ export async function getServerSideProps({ query }) {
     ...priceFilter,
     ...brandFilter,
   });
-  await db.disconnect();
 
+  await db.disconnect();
   const products = productDocs.map(db.convertDocToObj);
 
   return {
