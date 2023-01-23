@@ -18,12 +18,10 @@ export default function Layout({ title, children }) {
   const { state, dispatch } = useContext(Store);
   const { cart } = state;
 
-  const [setSidebarVisible] = useState(false);
+  const [sidbarVisible, setSidebarVisible] = useState(false);
+
   const sidebarOpenHandler = () => {
-    true;
-  };
-  const sidebarCloseHandler = () => {
-    setSidebarVisible(false);
+    setSidebarVisible(!sidbarVisible);
   };
 
   const [categories, setCategories] = useState([]);
@@ -176,10 +174,14 @@ export default function Layout({ title, children }) {
               )}
             </div>
           </nav>
-          <div className="fixed top-0 left-0 z-40 h-full w-[20rem] translate-x-[-20rem] bg-gray-300 p-10  duration-300 ease-in-out dark:bg-gray-800">
+          <div
+            className={`fixed top-0 left-0 z-40 h-full w-[20rem] ${
+              sidbarVisible ? 'translate-x-0' : 'translate-x-[-20rem]'
+            } bg-gray-300 p-10  duration-300 ease-in-out dark:bg-gray-800`}
+          >
             <div className="mb-2 flex justify-between">
-              <h2>Shopping By Categories</h2>
-              <button>
+              <h3>Shop By Categories</h3>
+              <button onClick={sidebarOpenHandler}>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
@@ -201,7 +203,7 @@ export default function Layout({ title, children }) {
               {categories.map((category) => (
                 <Link key={category} href={`/search?category=${category}`}>
                   <a>
-                    <li onClick={sidebarCloseHandler}>{category}</li>
+                    <li onClick={sidebarOpenHandler}>{category}</li>
                   </a>
                 </Link>
               ))}
