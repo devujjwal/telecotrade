@@ -103,6 +103,18 @@ function OrderScreen() {
     deliveredAt,
   } = order;
 
+  async function paidOrderHandler() {
+    try {
+      dispatch({ type: 'PAY_REQUEST' });
+      const { data } = await axios.put(`/api/orders/${order._id}/pay`, {});
+      dispatch({ type: 'PAY_SUCCESS', payload: data });
+      toast.success('Order is paid successfully');
+    } catch (err) {
+      dispatch({ type: 'PAY_FAIL', payload: getError(err) });
+      toast.error(getError(err));
+    }
+  }
+
   async function deliverOrderHandler() {
     try {
       dispatch({ type: 'DELIVER_REQUEST' });
@@ -234,6 +246,17 @@ function OrderScreen() {
                     {loadingPay && <div>Loading...</div>}
                   </li>
                 )}
+                {session.user.isAdmin && !isPaid && (
+                  <li>
+                    {loadingPay && <div>Loading...</div>}
+                    <button
+                      className="primary-button w-full"
+                      onClick={paidOrderHandler}
+                    >
+                      Mark as Paid
+                    </button>
+                  </li>
+                )}
                 {session.user.isAdmin && order.isPaid && !order.isDelivered && (
                   <li>
                     {loadingDeliver && <div>Loading...</div>}
@@ -241,7 +264,7 @@ function OrderScreen() {
                       className="primary-button w-full"
                       onClick={deliverOrderHandler}
                     >
-                      Deliver Order
+                      Mark as Delivered
                     </button>
                   </li>
                 )}
