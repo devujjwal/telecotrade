@@ -1,4 +1,3 @@
-import { PayPalButtons, usePayPalScriptReducer } from '@paypal/react-paypal-js';
 import axios from 'axios';
 import { useSession } from 'next-auth/react';
 import Image from 'next/image';
@@ -46,8 +45,6 @@ function reducer(state, action) {
 function OrderScreen() {
   const { data: session } = useSession();
   // order/:id
-  const [{ isPending }, paypalDispatch] = usePayPalScriptReducer();
-
   const { query } = useRouter();
   const orderId = query.id;
 
@@ -90,21 +87,8 @@ function OrderScreen() {
       if (successDeliver) {
         dispatch({ type: 'DELIVER_RESET' });
       }
-    } else {
-      const loadPaypalScript = async () => {
-        const { data: clientId } = await axios.get('/api/keys/paypal');
-        paypalDispatch({
-          type: 'resetOptions',
-          value: {
-            'client-id': clientId,
-            currency: 'USD',
-          },
-        });
-        paypalDispatch({ type: 'setLoadingStatus', value: 'pending' });
-      };
-      loadPaypalScript();
     }
-  }, [order, orderId, paypalDispatch, successDeliver, successPay]);
+  }, [order, orderId, successDeliver, successPay]);
   const {
     shippingAddress,
     paymentMethod,
@@ -274,17 +258,13 @@ function OrderScreen() {
                 </li>
                 {!isPaid && (
                   <li>
-                    {isPending ? (
-                      <div>Loading...</div>
-                    ) : (
-                      <div className="w-full">
-                        <strong>
-                          Transfer to below Bank Account, so that your order can
-                          be processed, and will update the payment and delivery
-                          status post that
-                        </strong>
-                      </div>
-                    )}
+                    <div className="w-full">
+                      <strong>
+                        Transfer to below Bank Account, so that your order can
+                        be processed, and will update the payment and delivery
+                        status post that
+                      </strong>
+                    </div>
                     {loadingPay && <div>Loading...</div>}
                   </li>
                 )}
