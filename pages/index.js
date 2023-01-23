@@ -8,7 +8,6 @@ import db from '../utils/db';
 import { Store } from '../utils/Store';
 import { Carousel } from 'react-responsive-carousel';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
-import Link from 'next/link';
 import bannerOne from '../public/images/banner1.jpg';
 import Image from 'next/image';
 
