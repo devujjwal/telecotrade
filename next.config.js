@@ -2,7 +2,7 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    domains: ['images.bluefinmobileshop.com'],
+    domains: ['localhost', 'images.bluefinmobileshop.com'],
   },
 };
 

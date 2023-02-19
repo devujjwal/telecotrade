@@ -2,8 +2,14 @@ import '../styles/globals.css';
 import { SessionProvider, useSession } from 'next-auth/react';
 import { StoreProvider } from '../utils/Store';
 import { useRouter } from 'next/router';
+import AOS from 'aos';
+import 'aos/dist/aos.css';
+import { useEffect } from 'react';
 
 function MyApp({ Component, pageProps: { session, ...pageProps } }) {
+  useEffect(() => {
+    AOS.init();
+  }, []);
   return (
     <SessionProvider session={session}>
       <StoreProvider>

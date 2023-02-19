@@ -42,6 +42,19 @@ function reducer(state, action) {
       };
     case 'CART_CLEAR_ITEMS':
       return { ...state, cart: { ...state.cart, cartItems: [] } };
+    
+    case 'PROCEED_CHECKOUT':
+      return {
+        ...state,
+        cart: {
+          ...state.cart,
+          paymentMethod: action.payload,
+          shippingAddress: {
+            ...state.cart.shippingAddress,
+            ...action.payload,
+          },
+        },
+    };
 
     case 'SAVE_SHIPPING_ADDRESS':
       return {

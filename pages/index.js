@@ -8,7 +8,8 @@ import db from '../utils/db';
 import { Store } from '../utils/Store';
 import { Carousel } from 'react-responsive-carousel';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
-import bannerOne from '../public/images/banner1.jpg';
+import bannerOne from '../public/images/banner1.png';
+import bannerTwo from '../public/images/banner2.png';
 import Image from 'next/image';
 
 export default function Home({ products }) {
@@ -30,23 +31,47 @@ export default function Home({ products }) {
 
   return (
     <Layout title="Home Page">
-      <Carousel showThumbs={false} autoPlay>
-        <div>
-          <Image src={bannerOne} alt="Picture of the author" />
+      <div className="w-full mb-[60px]">
+        <div className="container-x mx-auto">
+          <div className="main-wrapper w-full">
+            <Carousel showThumbs={false} autoPlay>
+              <div>
+                <Image src={bannerOne} alt="Picture of the author" />
+              </div>
+              <div>
+                <Image src={bannerTwo} alt="Picture of the author" />
+              </div>
+            </Carousel>
+          </div>
         </div>
-        <div>
-          <Image src={bannerOne} alt="Picture of the author" />
+      </div>
+      <div className="section-wrapper w-full">
+        <div className="container-x mx-auto">
+          <div className=" section-title flex justify-between items-center mb-5">
+            <div>
+              <h1 className="sm:text-3xl text-xl font-600 text-qblacktext leading-none">
+                Latest Products
+              </h1>
+            </div>
+          </div>
+          <div className="section-content">
+            <div data-aos="fade-up" className="section-style-one">
+              <div className="products-section w-full">
+                <div className="grid xl:grid-cols-4 lg:grid-cols-3 sm:grid-cols-2 grid-cols-2 xl:gap-[30px] gap-5">
+                  {products.map((product) => (
+                    <div key={product.slug} className="item">
+                      <ProductItem
+                        product={product}
+                        key={product.slug}
+                        addToCartHandler={addToCartHandler}
+                      ></ProductItem>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-      </Carousel>
-      <h2 className="h2 my-4">Latest Products</h2>
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-4">
-        {products.map((product) => (
-          <ProductItem
-            product={product}
-            key={product.slug}
-            addToCartHandler={addToCartHandler}
-          ></ProductItem>
-        ))}
       </div>
     </Layout>
   );
