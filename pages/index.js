@@ -36,6 +36,7 @@ export default function Home({ products }) {
           <div className="main-wrapper w-full">
             <Carousel showThumbs={false} autoPlay>
               <div>
+<<<<<<< HEAD
                 <Image
                   src={bannerOne}
                   alt="Telecommunication Trading Germany Company"
@@ -46,6 +47,12 @@ export default function Home({ products }) {
                   src={bannerTwo}
                   alt="Telecommunication Trading Germany Company"
                 />
+=======
+                <Image src={bannerOne} alt="Picture of the author" />
+              </div>
+              <div>
+                <Image src={bannerTwo} alt="Picture of the author" />
+>>>>>>> 557cf7fe92c827f041d76e4e0dbb1676234e48c3
               </div>
             </Carousel>
           </div>
@@ -63,7 +70,11 @@ export default function Home({ products }) {
           <div className="section-content">
             <div data-aos="fade-up" className="section-style-one">
               <div className="products-section w-full">
+<<<<<<< HEAD
                 <div className="grid xl:grid-cols-4 lg:grid-cols-3 sm:grid-cols-2 grid-cols-1 xl:gap-[30px] gap-5">
+=======
+                <div className="grid xl:grid-cols-4 lg:grid-cols-3 sm:grid-cols-2 grid-cols-2 xl:gap-[30px] gap-5">
+>>>>>>> 557cf7fe92c827f041d76e4e0dbb1676234e48c3
                   {products.map((product) => (
                     <div key={product.slug} className="item">
                       <ProductItem
