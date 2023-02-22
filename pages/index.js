@@ -36,10 +36,16 @@ export default function Home({ products }) {
           <div className="main-wrapper w-full">
             <Carousel showThumbs={false} autoPlay>
               <div>
-                <Image src={bannerOne} alt="Picture of the author" />
+                <Image
+                  src={bannerOne}
+                  alt="Telecommunication Trading Germany Company"
+                />
               </div>
               <div>
-                <Image src={bannerTwo} alt="Picture of the author" />
+                <Image
+                  src={bannerTwo}
+                  alt="Telecommunication Trading Germany Company"
+                />
               </div>
             </Carousel>
           </div>
@@ -57,7 +63,7 @@ export default function Home({ products }) {
           <div className="section-content">
             <div data-aos="fade-up" className="section-style-one">
               <div className="products-section w-full">
-                <div className="grid xl:grid-cols-4 lg:grid-cols-3 sm:grid-cols-2 grid-cols-2 xl:gap-[30px] gap-5">
+                <div className="grid xl:grid-cols-4 lg:grid-cols-3 sm:grid-cols-2 grid-cols-1 xl:gap-[30px] gap-5">
                   {products.map((product) => (
                     <div key={product.slug} className="item">
                       <ProductItem
