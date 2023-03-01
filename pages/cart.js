@@ -278,15 +278,13 @@ function CartScreen() {
                       You cart is empty!
                     </h1>
                     <Link href="/">
-                      <a>
-                        <div className="flex justify-center w-full ">
-                          <div className="w-[180px] h-[50px] ">
-                            <span type="button" className="yellow-btn">
-                              Back to WebShop
-                            </span>
-                          </div>
+                      <div className="flex justify-center w-full ">
+                        <div className="w-[180px] h-[50px] ">
+                          <span type="button" className="yellow-btn">
+                            Back to WebShop
+                          </span>
                         </div>
-                      </a>
+                      </div>
                     </Link>
                   </div>
                 </div>
@@ -334,21 +332,19 @@ function CartScreen() {
                             <div className="flex space-x-6 items-center">
                               <div className="w-[80px] h-[80px] overflow-hidden flex justify-center items-center border border-[#EDEDED]">
                                 <Link href={`/product/${item.slug}`}>
-                                  <a>
-                                    <Image
-                                      src={item.image}
-                                      alt={item.name}
-                                      width={50}
-                                      height={50}
-                                      objectFit="contain"
-                                    ></Image>
-                                  </a>
+                                  <Image
+                                    src={item.image}
+                                    alt={item.name}
+                                    width={50}
+                                    height={50}
+                                    objectFit="contain"
+                                  ></Image>
                                 </Link>
                               </div>
                               <div className="flex-1 flex flex-col  text-left">
                                 <p className="font-medium text-[15px] text-qblack">
                                   <Link href={`/product/${item.slug}`}>
-                                    <a>{item.name}</a>
+                                    {item.name}
                                   </Link>
                                 </p>
                               </div>

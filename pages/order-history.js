@@ -291,15 +291,13 @@ function OrderHistoryScreen() {
                       You haven&apos;t ordered anything yet!
                     </h1>
                     <Link href="/">
-                      <a>
-                        <div className="flex justify-center w-full ">
-                          <div className="w-[180px] h-[50px] ">
-                            <span type="button" className="yellow-btn">
-                              Back to Shop
-                            </span>
-                          </div>
+                      <div className="flex justify-center w-full ">
+                        <div className="w-[180px] h-[50px] ">
+                          <span type="button" className="yellow-btn">
+                            Back to Shop
+                          </span>
                         </div>
-                      </a>
+                      </div>
                     </Link>
                   </div>
                 </div>
@@ -382,7 +380,7 @@ function OrderHistoryScreen() {
                             <div className="flex space-x-1 items-center justify-center">
                               <span className="text-[15px] font-normal">
                                 <Link href={`/order/${order._id}`} passHref>
-                                  <a>Details</a>
+                                  Details
                                 </Link>
                               </span>
                             </div>

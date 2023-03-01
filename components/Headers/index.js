@@ -40,23 +40,19 @@ export default function Header({ className, drawerAction }) {
           </div>
           <div>
             <Link href="/">
-              <a>
-                <Image
-                  width="152"
-                  height="36"
-                  src="/images/logo.svg"
-                  alt="logo"
-                />
-              </a>
+              <Image
+                width="152"
+                height="36"
+                src="/images/logo.svg"
+                alt="logo"
+              />
             </Link>
           </div>
           <div className="cart relative cursor-pointer">
             <Link href="/cart">
-              <a>
-                <span>
-                  <ShoppingCartIcon className="w-7 h-8"></ShoppingCartIcon>
-                </span>
-              </a>
+              <span>
+                <ShoppingCartIcon className="w-7 h-8"></ShoppingCartIcon>
+              </span>
             </Link>
             {cartItemsCount > 0 && (
               <span className="w-[18px] h-[18px] rounded-full bg-qyellow absolute -top-2.5 -right-2.5 flex justify-center items-center text-[9px]">

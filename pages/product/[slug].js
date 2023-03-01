@@ -105,7 +105,7 @@ export default function ProductScreen(props) {
                       className="text-qgray text-xs font-normal uppercase tracking-wider mb-2 inline-block"
                     >
                       <Link href={`/search?brand=${product.brand}`}>
-                        <a>{product.brand}</a>
+                        {product.brand}
                       </Link>
                     </span>
                     <p
@@ -138,13 +138,14 @@ export default function ProductScreen(props) {
                       </div>
                     ) : (
                       <div className="w-full my-2">
-                        <Link href={`/login`}>
-                          <a className="flex items-center space-x-3 text-qred text-sm">
-                            <span>
-                              <LockOpenIcon className="w-3 h-3" />
-                            </span>
-                            <span>Login to view price and place order</span>
-                          </a>
+                        <Link
+                          href={`/login`}
+                          className="flex items-center space-x-3 text-qred text-sm"
+                        >
+                          <span>
+                            <LockOpenIcon className="w-3 h-3" />
+                          </span>
+                          <span>Login to view price and place order</span>
                         </Link>
                       </div>
                     )}

@@ -129,13 +129,11 @@ export default function Drawer({ className, open, action }) {
                 {categories.map((category) => (
                   <li className="category-item" key={category}>
                     <Link href={`/search?category=${category}`}>
-                      <a>
-                        <div className=" flex justify-between items-center px-5 h-10 bg-white hover:bg-qyellow transition-all duration-300 ease-in-out cursor-pointer">
-                          <div className="flex items-center space-x-6">
-                            <span className="text-xs font-400">{category}</span>
-                          </div>
+                      <div className=" flex justify-between items-center px-5 h-10 bg-white hover:bg-qyellow transition-all duration-300 ease-in-out cursor-pointer">
+                        <div className="flex items-center space-x-6">
+                          <span className="text-xs font-400">{category}</span>
                         </div>
-                      </a>
+                      </div>
                     </Link>
                   </li>
                 ))}
@@ -147,13 +145,11 @@ export default function Drawer({ className, open, action }) {
                 {brands.map((brand) => (
                   <li key={brand} className="category-item">
                     <Link href={`/search?brand=${brand}`}>
-                      <a>
-                        <div className=" flex justify-between items-center px-5 h-12 bg-white hover:bg-qyellow transition-all duration-300 ease-in-out cursor-pointer">
-                          <div className="flex items-center space-x-6">
-                            <span className="text-sm font-400">{brand}</span>
-                          </div>
+                      <div className=" flex justify-between items-center px-5 h-12 bg-white hover:bg-qyellow transition-all duration-300 ease-in-out cursor-pointer">
+                        <div className="flex items-center space-x-6">
+                          <span className="text-sm font-400">{brand}</span>
                         </div>
-                      </a>
+                      </div>
                     </Link>
                   </li>
                 ))}

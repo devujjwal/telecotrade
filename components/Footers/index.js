@@ -8,14 +8,12 @@ export default function Footer() {
           {/* logo area */}
           <div className="mb-[40px]">
             <Link href="/">
-              <a>
-                <Image
-                  width="152"
-                  height="36"
-                  src="/images/logo.svg"
-                  alt="logo"
-                />
-              </a>
+              <Image
+                width="152"
+                height="36"
+                src="/images/logo.svg"
+                alt="logo"
+              />
             </Link>
           </div>
           <div className="w-full h-[1px] bg-[#E9E9E9]"></div>
@@ -36,25 +34,25 @@ export default function Footer() {
               <div>
                 <ul className="flex flex-col space-y-4 ">
                   <li>
-                    <a href="/about">
+                    <Link href="/about">
                       <span className="text-[#9A9A9A] text-[15px] hover:text-qblack border-b border-transparent hover:border-qblack cursor-pointer capitalize">
                         About Us
                       </span>
-                    </a>
+                    </Link>
                   </li>
                   <li>
-                    <a href="/terms-condition">
+                    <Link href="/terms-condition">
                       <span className="text-[#9A9A9A] text-[15px] hover:text-qblack border-b border-transparent hover:border-qblack cursor-pointer capitalize">
                         Terms Condition
                       </span>
-                    </a>
+                    </Link>
                   </li>
                   <li>
-                    <a href="/all-products">
+                    <Link href="/all-products">
                       <span className="text-[#9A9A9A] text-[15px] hover:text-qblack border-b border-transparent hover:border-qblack cursor-pointer capitalize">
                         Best Products
                       </span>
-                    </a>
+                    </Link>
                   </li>
                 </ul>
               </div>
@@ -69,25 +67,25 @@ export default function Footer() {
                 <div>
                   <ul className="flex flex-col space-y-4 ">
                     <li>
-                      <a href="/blogs">
+                      <Link href="/blogs">
                         <span className="text-[#9A9A9A] text-[15px] hover:text-qblack border-b border-transparent hover:border-qblack cursor-pointer capitalize">
                           Blog
                         </span>
-                      </a>
+                      </Link>
                     </li>
                     <li>
-                      <a href="/tracking-order">
+                      <Link href="/tracking-order">
                         <span className="text-[#9A9A9A] text-[15px] hover:text-qblack border-b border-transparent hover:border-qblack cursor-pointer capitalize">
                           Tracking Order
                         </span>
-                      </a>
+                      </Link>
                     </li>
                     <li>
-                      <a href="/become-saller">
+                      <Link href="/become-saller">
                         <span className="text-[#9A9A9A] text-[15px] hover:text-qblack border-b border-transparent hover:border-qblack cursor-pointer capitalize">
                           Become Seller
                         </span>
-                      </a>
+                      </Link>
                     </li>
                   </ul>
                 </div>
@@ -101,25 +99,25 @@ export default function Footer() {
                 <div>
                   <ul className="flex flex-col space-y-4 ">
                     <li>
-                      <a href="/flash-sale">
+                      <Link href="/flash-sale">
                         <span className="text-[#9A9A9A] text-[15px] hover:text-qblack border-b border-transparent hover:border-qblack cursor-pointer capitalize">
                           Flash Sale
                         </span>
-                      </a>
+                      </Link>
                     </li>
                     <li>
-                      <a href="/faq">
+                      <Link href="/faq">
                         <span className="text-[#9A9A9A] text-[15px] hover:text-qblack border-b border-transparent hover:border-qblack cursor-pointer capitalize">
                           FAQ
                         </span>
-                      </a>
+                      </Link>
                     </li>
                     <li>
-                      <a href="/about">
+                      <Link href="/about">
                         <span className="text-[#9A9A9A] text-[15px] hover:text-qblack border-b border-transparent hover:border-qblack cursor-pointer capitalize">
                           Support
                         </span>
-                      </a>
+                      </Link>
                     </li>
                   </ul>
                 </div>
@@ -131,14 +129,14 @@ export default function Footer() {
           <div className="flex lg:space-x-5 justify-between items-center mb-3">
             <span className="sm:text-base text-[10px] text-qgray font-300">
               ©2023
-              <a
+              <Link
                 href="https://telecotrade.com/"
                 target="_blank"
                 rel="noreferrer"
                 className="font-500 text-qblack mx-1"
               >
                 Telecommunication Trading Germany Company
-              </a>
+              </Link>
               All rights reserved
             </span>
           </div>

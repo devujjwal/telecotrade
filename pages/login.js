@@ -136,12 +136,12 @@ export default function LoginScreen() {
                           Remember Me
                         </span>
                       </div>
-                      <a
+                      <Link
                         href="/forgot-password"
                         className="text-base text-qyellow"
                       >
                         Forgot Password
-                      </a>
+                      </Link>
                     </div>
                     <div className="signin-area mb-3.5">
                       <div className="flex justify-center">
@@ -153,8 +153,8 @@ export default function LoginScreen() {
                     <div className="signup-area flex justify-center">
                       <p className="text-base text-qgraytwo font-normal">
                         Dont’t have an account ?{' '}
-                        <Link href="/register">
-                          <a className="ml-2 text-qblack">Register</a>
+                        <Link href="/register" className="ml-2 text-qblack">
+                          Register
                         </Link>
                       </p>
                     </div>

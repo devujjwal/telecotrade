@@ -208,8 +208,8 @@ export default function LoginScreen() {
                     <div className="signup-area flex justify-center">
                       <p className="text-base text-qgraytwo font-normal">
                         Already have an Account?{' '}
-                        <Link href="/login">
-                          <a className="ml-2 text-qblack">Login</a>
+                        <Link href="/login" className="ml-2 text-qblack">
+                          Login
                         </Link>
                       </p>
                     </div>

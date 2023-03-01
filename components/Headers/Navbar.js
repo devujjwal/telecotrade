@@ -101,15 +101,13 @@ export default function Navbar({ className }) {
                     {categories.map((category) => (
                       <li className="category-item" key={category}>
                         <Link href={`/search?category=${category}`}>
-                          <a>
-                            <div className=" flex justify-between items-center px-5 h-10 bg-white hover:bg-qyellow transition-all duration-300 ease-in-out cursor-pointer">
-                              <div className="flex items-center space-x-6">
-                                <span className="text-xs font-400">
-                                  {category}
-                                </span>
-                              </div>
+                          <div className=" flex justify-between items-center px-5 h-10 bg-white hover:bg-qyellow transition-all duration-300 ease-in-out cursor-pointer">
+                            <div className="flex items-center space-x-6">
+                              <span className="text-xs font-400">
+                                {category}
+                              </span>
                             </div>
-                          </a>
+                          </div>
                         </Link>
                       </li>
                     ))}
@@ -139,11 +137,9 @@ export default function Navbar({ className }) {
                                 {brands.map((brand) => (
                                   <li key={brand}>
                                     <Link href={`/search?brand=${brand}`}>
-                                      <a>
-                                        <span className="text-qgray text-sm font-400 border-b border-transparent hover:border-qyellow hover:text-qyellow">
-                                          {brand}
-                                        </span>
-                                      </a>
+                                      <span className="text-qgray text-sm font-400 border-b border-transparent hover:border-qyellow hover:text-qyellow">
+                                        {brand}
+                                      </span>
                                     </Link>
                                   </li>
                                 ))}
@@ -156,46 +152,38 @@ export default function Navbar({ className }) {
                   </li>
                   <li>
                     <Link href="/about">
-                      <a>
-                        <span className="flex items-center text-sm text-white font-600 cursor-pointer ">
-                          <span>About</span>
-                        </span>
-                      </a>
+                      <span className="flex items-center text-sm text-white font-600 cursor-pointer ">
+                        <span>About</span>
+                      </span>
                     </Link>
                   </li>
                   <li>
                     <Link href="/blogs">
-                      <a>
-                        <span className="flex items-center text-sm text-white font-600 cursor-pointer ">
-                          <span>Blog</span>
-                        </span>
-                      </a>
+                      <span className="flex items-center text-sm text-white font-600 cursor-pointer ">
+                        <span>Blog</span>
+                      </span>
                     </Link>
                   </li>
                   <li>
                     <Link href="/contact">
-                      <a>
-                        <span className="flex items-center text-sm text-white font-600 cursor-pointer ">
-                          <span>Contact</span>
-                        </span>
-                      </a>
+                      <span className="flex items-center text-sm text-white font-600 cursor-pointer ">
+                        <span>Contact</span>
+                      </span>
                     </Link>
                   </li>
                 </ul>
               </div>
             </div>
             <div className="become-seller-btn">
-              <Link href="/become-saller">
-                <a className="yellow-btn">
-                  <div className="w-[161px] h-[40px] flex justify-center items-center cursor-pointer">
-                    <div className="flex space-x-2 items-center">
-                      <span className="text-sm font-600">Become a Seller</span>
-                      <span>
-                        <ChevronRightIcon className="w-5 h-5" />
-                      </span>
-                    </div>
+              <Link href="/become-saller" className="yellow-btn">
+                <div className="w-[161px] h-[40px] flex justify-center items-center cursor-pointer">
+                  <div className="flex space-x-2 items-center">
+                    <span className="text-sm font-600">Become a Seller</span>
+                    <span>
+                      <ChevronRightIcon className="w-5 h-5" />
+                    </span>
                   </div>
-                </a>
+                </div>
               </Link>
             </div>
           </div>

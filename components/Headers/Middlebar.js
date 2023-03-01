@@ -37,14 +37,12 @@ export default function Middlebar({ className }) {
           <div className="flex justify-between items-center h-full">
             <div>
               <Link href="/">
-                <a>
-                  <Image
-                    width="152"
-                    height="36"
-                    src="/images/logo.svg"
-                    alt="logo"
-                  />
-                </a>
+                <Image
+                  width="152"
+                  height="36"
+                  src="/images/logo.svg"
+                  alt="logo"
+                />
               </Link>
             </div>
             <div className="w-[517px] h-[44px]">
@@ -54,11 +52,9 @@ export default function Middlebar({ className }) {
               <div className="cart-wrapper group relative">
                 <div className="cart relative cursor-pointer">
                   <Link href="/cart">
-                    <a>
-                      <span>
-                        <ShoppingCartIcon className="w-7 h-8"></ShoppingCartIcon>
-                      </span>
-                    </a>
+                    <span>
+                      <ShoppingCartIcon className="w-7 h-8"></ShoppingCartIcon>
+                    </span>
                   </Link>
                   {cartItemsCount > 0 && (
                     <span className="w-[18px] h-[18px] rounded-full bg-qyellow absolute -top-2.5 -right-2.5 flex justify-center items-center text-[9px]">
@@ -103,27 +99,25 @@ export default function Middlebar({ className }) {
                       </Menu.Item>
                     )}
                     <Menu.Item>
-                      <a
+                      <Link
                         className="dropdown-link"
                         href="#"
                         onClick={logoutClickHandler}
                       >
                         Logout
-                      </a>
+                      </Link>
                     </Menu.Item>
                   </Menu.Items>
                 </Menu>
               ) : (
                 <Link href="/login">
-                  <a>
-                    <div className="flex space-x-2 items-center border-l-2 border-gray-100 pl-2">
-                      <UserCircleIcon className="w-12 h-12"></UserCircleIcon>
-                      <div>
-                        <span className="text-sm leading-none">Sign In</span>
-                        <b className="block leading-none">Account</b>
-                      </div>
+                  <div className="flex space-x-2 items-center border-l-2 border-gray-100 pl-2">
+                    <UserCircleIcon className="w-12 h-12"></UserCircleIcon>
+                    <div>
+                      <span className="text-sm leading-none">Sign In</span>
+                      <b className="block leading-none">Account</b>
                     </div>
-                  </a>
+                  </div>
                 </Link>
               )}
             </div>

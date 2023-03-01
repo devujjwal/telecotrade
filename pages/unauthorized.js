@@ -322,15 +322,13 @@ export default function Unauthorized() {
                     </div>
                   )}
                   <Link href="/">
-                    <a>
-                      <div className="flex justify-center w-full ">
-                        <div className="w-[180px] h-[50px] ">
-                          <span type="button" className="yellow-btn">
-                            Back to WebShop
-                          </span>
-                        </div>
+                    <div className="flex justify-center w-full ">
+                      <div className="w-[180px] h-[50px] ">
+                        <span type="button" className="yellow-btn">
+                          Back to WebShop
+                        </span>
                       </div>
-                    </a>
+                    </div>
                   </Link>
                 </div>
               </div>
