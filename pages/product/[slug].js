@@ -124,9 +124,13 @@ export default function ProductScreen(props) {
                       >
                         <span className="text-sm font-500 text-qgray line-through mt-2">
                           €
-                          {product.price +
-                            product.price *
-                              (Math.floor(Math.random() * 0.7) + 0.1)}
+                          {
+                            +parseFloat(
+                              product.price +
+                                product.price *
+                                  (Math.floor(Math.random() * 0.7) + 0.1)
+                            ).toFixed(3)
+                          }
                         </span>
                         <span className="text-2xl font-500 text-qred">
                           €{product.price}

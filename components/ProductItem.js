@@ -46,8 +46,8 @@ export default function ProductItem({ product, addToCartHandler }) {
           <p className="price">
             <span className="main-price text-qgray line-through font-600 text-[18px]">
               €
-              {product.price +
-                product.price * (Math.floor(Math.random() * 0.7) + 0.1)}
+              {+parseFloat(product.price +
+                product.price * (Math.floor(Math.random() * 0.7) + 0.1)).toFixed(3)}
             </span>
             <span className="offer-price text-qred font-600 text-[18px] ml-2">
               €{product.price}
